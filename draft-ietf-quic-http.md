@@ -1,12 +1,12 @@
 ---
-title: Hypertext Transfer Protocol (HTTP) over QUIC
-abbrev: HTTP/QUIC
+title: Hypertext Transfer Protocol (HTTP) over QWIK
+abbrev: HTTP/QWIK
 docname: draft-ietf-quic-http-latest
 date: {DATE}
 category: std
 ipr: trust200902
 area: Transport
-workgroup: QUIC
+workgroup: QWIK
 
 stand_alone: yes
 pi: [toc, sortrefs, symrefs, docmapping]
@@ -21,8 +21,8 @@ author:
 
 normative:
 
-  QUIC-TRANSPORT:
-    title: "QUIC: A UDP-Based Multiplexed and Secure Transport"
+  QWIK-TRANSPORT:
+    title: "QWIK: A UDP-Based Multiplexed and Secure Transport"
     date: {DATE}
     seriesinfo:
       Internet-Draft: draft-ietf-quic-transport-latest
@@ -39,7 +39,7 @@ normative:
         role: editor
 
   QPACK:
-    title: "QPACK: Header Compression for HTTP over QUIC"
+    title: "QPACK: Header Compression for HTTP over QWIK"
     date: {DATE}
     seriesinfo:
       Internet-Draft: draft-ietf-quic-qpack-latest
@@ -64,15 +64,15 @@ informative:
 
 --- abstract
 
-The QUIC transport protocol has several features that are desirable in a
+The QWIK transport protocol has several features that are desirable in a
 transport for HTTP, such as stream multiplexing, per-stream flow control, and
 low-latency connection establishment.  This document describes a mapping of HTTP
-semantics over QUIC.  This document also identifies HTTP/2 features that are
-subsumed by QUIC, and describes how HTTP/2 extensions can be ported to QUIC.
+semantics over QWIK.  This document also identifies HTTP/2 features that are
+subsumed by QWIK, and describes how HTTP/2 extensions can be ported to QWIK.
 
 --- note_Note_to_Readers
 
-Discussion of this draft takes place on the QUIC working group mailing list
+Discussion of this draft takes place on the QWIK working group mailing list
 (quic@ietf.org), which is archived at
 <https://mailarchive.ietf.org/arch/search/?email_list=quic>.
 
@@ -92,20 +92,20 @@ HTTP/2.  HTTP/2 introduced a framing and multiplexing layer to improve latency
 without modifying the transport layer.  However, TCP's lack of visibility into
 parallel requests in both mappings limited the possible performance gains.
 
-The QUIC transport protocol incorporates stream multiplexing and per-stream flow
+The QWIK transport protocol incorporates stream multiplexing and per-stream flow
 control, similar to that provided by the HTTP/2 framing layer. By providing
 reliability at the stream level and congestion control across the entire
 connection, it has the capability to improve the performance of HTTP compared to
-a TCP mapping.  QUIC also incorporates TLS 1.3 at the transport layer, offering
+a TCP mapping.  QWIK also incorporates TLS 1.3 at the transport layer, offering
 comparable security to running TLS over TCP, but with improved connection setup
 latency.
 
-This document describes a mapping of HTTP semantics over the QUIC transport
+This document describes a mapping of HTTP semantics over the QWIK transport
 protocol, drawing heavily on design of HTTP/2. This document identifies HTTP/2
-features that are subsumed by QUIC, and describes how the other features can be
-implemented atop QUIC.
+features that are subsumed by QWIK, and describes how the other features can be
+implemented atop QWIK.
 
-QUIC is described in {{QUIC-TRANSPORT}}.  For a full description of HTTP/2, see
+QWIK is described in {{QWIK-TRANSPORT}}.  For a full description of HTTP/2, see
 {{!RFC7540}}.
 
 
@@ -120,11 +120,11 @@ Field definitions are given in Augmented Backus-Naur Form (ABNF), as defined in
 {{!RFC5234}}.
 
 This document uses the variable-length integer encoding from
-{{QUIC-TRANSPORT}}.
+{{QWIK-TRANSPORT}}.
 
 Protocol elements called "frames" exist in both this document and
-{{QUIC-TRANSPORT}}. Where frames from {{QUIC-TRANSPORT}} are referenced, the
-frame name will be prefaced with "QUIC."  For example, "QUIC APPLICATION_CLOSE
+{{QWIK-TRANSPORT}}. Where frames from {{QWIK-TRANSPORT}} are referenced, the
+frame name will be prefaced with "QWIK."  For example, "QWIK APPLICATION_CLOSE
 frames."  References without this preface refer to frames defined in {{frames}}.
 
 
@@ -135,7 +135,7 @@ frames."  References without this preface refer to frames defined in {{frames}}.
 > **RFC Editor's Note:**  Please remove this section prior to publication of a
 > final version of this document.
 
-HTTP/QUIC uses the token "hq" to identify itself in ALPN and Alt-Svc.  Only
+HTTP/QWIK uses the token "hq" to identify itself in ALPN and Alt-Svc.  Only
 implementations of the final, published RFC can identify themselves as "hq".
 Until such an RFC exists, implementations MUST NOT identify themselves using
 this string.
@@ -152,44 +152,44 @@ itself as "hq-09-rickroll". Note that any label MUST conform to the "token"
 syntax defined in Section 3.2.6 of [RFC7230]. Experimenters are encouraged to
 coordinate their experiments on the quic@ietf.org mailing list.
 
-## Discovering an HTTP/QUIC Endpoint
+## Discovering an HTTP/QWIK Endpoint
 
-An HTTP origin advertises the availability of an equivalent HTTP/QUIC endpoint
+An HTTP origin advertises the availability of an equivalent HTTP/QWIK endpoint
 via the Alt-Svc HTTP response header field or the HTTP/2 ALTSVC frame
 ({{!ALTSVC=RFC7838}}), using the ALPN token defined in
 {{connection-establishment}}.
 
 For example, an origin could indicate in an HTTP/1.1 or HTTP/2 response that
-HTTP/QUIC was available on UDP port 50781 at the same hostname by including the
+HTTP/QWIK was available on UDP port 50781 at the same hostname by including the
 following header field in any response:
 
 ~~~ example
 Alt-Svc: hq=":50781"
 ~~~
 
-On receipt of an Alt-Svc record indicating HTTP/QUIC support, a client MAY
-attempt to establish a QUIC connection to the indicated host and port and, if
+On receipt of an Alt-Svc record indicating HTTP/QWIK support, a client MAY
+attempt to establish a QWIK connection to the indicated host and port and, if
 successful, send HTTP requests using the mapping described in this document.
 
-Connectivity problems (e.g. firewall blocking UDP) can result in QUIC connection
+Connectivity problems (e.g. firewall blocking UDP) can result in QWIK connection
 establishment failure, in which case the client SHOULD continue using the
 existing connection or try another alternative endpoint offered by the origin.
 
-Servers MAY serve HTTP/QUIC on any UDP port, since an alternative always
+Servers MAY serve HTTP/QWIK on any UDP port, since an alternative always
 includes an explicit port.
 
-### QUIC Version Hints {#alt-svc-version-hint}
+### QWIK Version Hints {#alt-svc-version-hint}
 
-This document defines the "quic" parameter for Alt-Svc, which MAY be used to
-provide version-negotiation hints to HTTP/QUIC clients. QUIC versions are
+This document defines the "qwik" parameter for Alt-Svc, which MAY be used to
+provide version-negotiation hints to HTTP/QWIK clients. QWIK versions are
 four-octet sequences with no additional constraints on format.  Leading zeros
 SHOULD be omitted for brevity.
 
 Syntax:
 
 ~~~ abnf
-quic = DQUOTE version-number [ "," version-number ] * DQUOTE
-version-number = 1*8HEXDIG; hex-encoded QUIC version
+qwik = DQUOTE version-number [ "," version-number ] * DQUOTE
+version-number = 1*8HEXDIG ; hex-encoded QWIK version
 ~~~
 
 Where multiple versions are listed, the order of the values reflects the
@@ -198,17 +198,17 @@ Reserved versions MAY be listed, but unreserved versions which are not supported
 by the alternative SHOULD NOT be present in the list. Origins MAY omit supported
 versions for any reason.
 
-Clients MUST ignore any included versions which they do not support.  The "quic"
+Clients MUST ignore any included versions which they do not support.  The "qwik"
 parameter MUST NOT occur more than once; clients SHOULD process only the first
 occurrence.
 
 For example, suppose a server supported both version 0x00000001 and the version
 rendered in ASCII as "Q034".  If it also opted to include the reserved version
-(from Section 3 of {{QUIC-TRANSPORT}}) 0x1abadaba, it could specify the
+(from Section 3 of {{QWIK-TRANSPORT}}) 0x1abadaba, it could specify the
 following header field:
 
 ~~~ example
-Alt-Svc: hq=":49288";quic="1,1abadaba,51303334"
+Alt-Svc: hq=":49288";qwik="1,1abadaba,51303334"
 ~~~
 
 A client acting on this header field would drop the reserved version (not
@@ -217,20 +217,20 @@ in the list which it does support, if any.
 
 ## Connection Establishment {#connection-establishment}
 
-HTTP/QUIC relies on QUIC as the underlying transport.  The QUIC version being
-used MUST use TLS version 1.3 or greater as its handshake protocol.  HTTP/QUIC
+HTTP/QWIK relies on QWIK as the underlying transport.  The QWIK version being
+used MUST use TLS version 1.3 or greater as its handshake protocol.  HTTP/QWIK
 clients MUST indicate the target domain name during the TLS handshake. This may
 be done using the Server Name Indication (SNI) {{!RFC6066}} extension to TLS or
 using some other mechanism.
 
-QUIC connections are established as described in {{QUIC-TRANSPORT}}. During
-connection establishment, HTTP/QUIC support is indicated by selecting the ALPN
+QWIK connections are established as described in {{QWIK-TRANSPORT}}. During
+connection establishment, HTTP/QWIK support is indicated by selecting the ALPN
 token "hq" in the TLS handshake.  Support for other application-layer protocols
 MAY be offered in the same handshake.
 
-While connection-level options pertaining to the core QUIC protocol are set in
-the initial crypto handshake, HTTP/QUIC-specific settings are conveyed in the
-SETTINGS frame. After the QUIC connection is established, a SETTINGS frame
+While connection-level options pertaining to the core QWIK protocol are set in
+the initial crypto handshake, HTTP/QWIK-specific settings are conveyed in the
+SETTINGS frame. After the QWIK connection is established, a SETTINGS frame
 ({{frame-settings}}) MUST be sent by each endpoint as the initial frame of their
 respective HTTP control stream (see {{control-streams}}). The server MUST NOT
 process any request streams or send responses until the client's SETTINGS frame
@@ -242,12 +242,12 @@ Once a connection exists to a server endpoint, this connection MAY be reused for
 requests with multiple different URI authority components.  The client MAY send
 any requests for which the client considers the server authoritative.
 
-An authoritative HTTP/QUIC endpoint is typically discovered because the client
+An authoritative HTTP/QWIK endpoint is typically discovered because the client
 has received an Alt-Svc record from the request's origin which nominates the
 endpoint as a valid HTTP Alternative Service for that origin.  As required by
 {{RFC7838}}, clients MUST check that the nominated server can present a valid
 certificate for the origin before considering it authoritative. Clients MUST NOT
-assume that an HTTP/QUIC endpoint is authoritative for other origins without an
+assume that an HTTP/QWIK endpoint is authoritative for other origins without an
 explicit signal.
 
 A server that does not wish clients to reuse connections for a particular origin
@@ -256,24 +256,24 @@ can indicate that it is not authoritative for a request by sending a 421
 of {{!RFC7540}}).
 
 The considerations discussed in Section 9.1 of {{?RFC7540}} also apply to the
-management of HTTP/QUIC connections.
+management of HTTP/QWIK connections.
 
 # Stream Mapping and Usage {#stream-mapping}
 
-A QUIC stream provides reliable in-order delivery of bytes, but makes no
+A QWIK stream provides reliable in-order delivery of bytes, but makes no
 guarantees about order of delivery with regard to bytes on other streams. On the
-wire, data is framed into QUIC STREAM frames, but this framing is invisible to
-the HTTP framing layer. The transport layer buffers and orders received QUIC
+wire, data is framed into QWIK STREAM frames, but this framing is invisible to
+the HTTP framing layer. The transport layer buffers and orders received QWIK
 STREAM frames, exposing the data contained within as a reliable byte stream to
 the application.
 
-QUIC streams can be either unidirectional, carrying data only from initiator to
+QWIK streams can be either unidirectional, carrying data only from initiator to
 receiver, or bidirectional.  Streams can be initiated by either the client or
-the server.  For more detail on QUIC streams, see {{QUIC-TRANSPORT}}, Section 9.
+the server.  For more detail on QWIK streams, see {{QWIK-TRANSPORT}}, Section 9.
 
-When HTTP headers and data are sent over QUIC, the QUIC layer handles most of
+When HTTP headers and data are sent over QWIK, the QWIK layer handles most of
 the stream management.  HTTP does not need to do any separate multiplexing when
-using QUIC - data sent over a QUIC stream always maps to a particular HTTP
+using QWIK - data sent over a QWIK stream always maps to a particular HTTP
 transaction or connection context.
 
 ## Bidirectional Streams
@@ -281,10 +281,10 @@ transaction or connection context.
 All client-initiated bidirectional streams are used for HTTP requests and
 responses.  A bidirectional stream ensures that the response can be readily
 correlated with the request. This means that the client's first request occurs
-on QUIC stream 0, with subsequent requests on stream 4, 8, and so on. In order
-to permit these streams to open, an HTTP/QUIC client SHOULD send non-zero values
-for the QUIC transport parameters `initial_max_stream_data_bidi_local`. An
-HTTP/QUIC server SHOULD send non-zero values for the QUIC transport parameters
+on QWIK stream 0, with subsequent requests on stream 4, 8, and so on. In order
+to permit these streams to open, an HTTP/QWIK client SHOULD send non-zero values
+for the QWIK transport parameters `initial_max_stream_data_bidi_local`. An
+HTTP/QWIK server SHOULD send non-zero values for the QWIK transport parameters
 `initial_max_stream_data_bidi_remote` and `initial_max_bidi_streams`. It is
 recommended that `initial_max_bidi_streams` be no smaller than 100, so as to not
 unnecessarily limit parallelism.
@@ -295,8 +295,8 @@ the stream was truncated, this MUST be treated as a connection error (see
 HTTP_MALFORMED_FRAME in {{http-error-codes}}).  Streams which terminate abruptly
 may be reset at any point in the frame.
 
-HTTP/QUIC does not use server-initiated bidirectional streams; clients MUST omit
-or specify a value of zero for the QUIC transport parameter
+HTTP/QWIK does not use server-initiated bidirectional streams; clients MUST omit
+or specify a value of zero for the QWIK transport parameter
 `initial_max_bidi_streams`.
 
 
@@ -318,14 +318,14 @@ this header is determined by the stream type.
 Some stream types are reserved ({{stream-grease}}).  Two stream types are
 defined in this document: control streams ({{control-streams}}) and push streams
 ({{push-streams}}).  Other stream types can be defined by extensions to
-HTTP/QUIC.
+HTTP/QWIK.
 
-Both clients and servers SHOULD send a value of three or greater for the QUIC
+Both clients and servers SHOULD send a value of three or greater for the QWIK
 transport parameter `initial_max_uni_streams`.
 
 If the stream header indicates a stream type which is not supported by the
 recipient, the remainder of the stream cannot be consumed as the semantics are
-unknown. Recipients of unknown stream types MAY trigger a QUIC STOP_SENDING
+unknown. Recipients of unknown stream types MAY trigger a QWIK STOP_SENDING
 frame with an error code of HTTP_UNKNOWN_STREAM_TYPE, but MUST NOT consider such
 streams to be an error of any kind.
 
@@ -337,7 +337,7 @@ sent until the peer is known to support them.
 ###  Control Streams
 
 The control stream is indicated by a stream type of `0x43` (ASCII 'C').  Data on
-this stream consists of HTTP/QUIC frames, as defined in {{frames}}.
+this stream consists of HTTP/QWIK frames, as defined in {{frames}}.
 
 Each side MUST initiate a single control stream at the beginning of the
 connection and send its SETTINGS frame as the first frame on this stream.  If
@@ -357,7 +357,7 @@ able to send stream data first after the cryptographic handshake completes.
 
 A push stream is indicated by a stream type of `0x50` (ASCII 'P'), followed by
 the Push ID of the promise that it fulfills, encoded as a variable-length
-integer. The remaining data on this stream consists of HTTP/QUIC frames, as
+integer. The remaining data on this stream consists of HTTP/QWIK frames, as
 defined in {{frames}}, and fulfills a promised server push.  Server push and
 Push IDs are described in {{server-push}}.
 
@@ -392,7 +392,7 @@ implementation chooses.
 # HTTP Framing Layer {#http-framing-layer}
 
 Frames are used on the control stream, request streams, and push streams.  This
-section describes HTTP framing in QUIC.  For a comparison with HTTP/2 frames,
+section describes HTTP framing in QWIK.  For a comparison with HTTP/2 frames,
 see {{h2-frames}}.
 
 ## Frame Layout
@@ -408,7 +408,7 @@ All frames have the following format:
 |    Type (8)   |               Frame Payload (*)             ...
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 ~~~~~~~~~~
-{: #fig-frame title="HTTP/QUIC frame format"}
+{: #fig-frame title="HTTP/QWIK frame format"}
 
 A frame includes the following fields:
 
@@ -539,7 +539,7 @@ the interpretation of the associated Element ID fields.
 | 11        | Root of the tree | Ignored             |
 
 Note that the root of the tree cannot be referenced using a Stream ID of 0, as
-in {{!RFC7540}}; QUIC stream 0 carries a valid HTTP request.  The root of the
+in {{!RFC7540}}; QWIK stream 0 carries a valid HTTP request.  The root of the
 tree cannot be reprioritized. A PRIORITY frame that prioritizes the root of the
 tree MUST be treated as a connection error of type HTTP_MALFORMED_FRAME.
 
@@ -563,13 +563,13 @@ When a server receives this frame, it aborts sending the response for the
 identified server push.  If the server has not yet started to send the server
 push, it can use the receipt of a CANCEL_PUSH frame to avoid opening a push
 stream.  If the push stream has been opened by the server, the server SHOULD
-send a QUIC RST_STREAM frame on that stream and cease transmission of the
+send a QWIK RST_STREAM frame on that stream and cease transmission of the
 response.
 
 A server can send this frame to indicate that it will not be fulfilling a
 promise prior to creation of a push stream.  Once the push stream has been
 created, sending CANCEL_PUSH has no effect on the state of the push stream.  A
-QUIC RST_STREAM frame SHOULD be used instead to abort transmission of the
+QWIK RST_STREAM frame SHOULD be used instead to abort transmission of the
 server push response.
 
 A CANCEL_PUSH frame is sent on the control stream.  Sending a CANCEL_PUSH frame
@@ -622,7 +622,7 @@ HTTP_MALFORMED_FRAME.
 
 The payload of a SETTINGS frame consists of zero or more parameters, each
 consisting of an unsigned 16-bit setting identifier and a value which uses the
-QUIC variable-length integer encoding.
+QWIK variable-length integer encoding.
 
 ~~~~~~~~~~~~~~~  drawing
  0                   1                   2                   3
@@ -656,7 +656,7 @@ HTTP_MALFORMED_FRAME.
 
 #### Defined SETTINGS Parameters {#settings-parameters}
 
-The following settings are defined in HTTP/QUIC:
+The following settings are defined in HTTP/QWIK:
 
   SETTINGS_NUM_PLACEHOLDERS (0x3):
   : This value SHOULD be non-zero.  The default value is 16.
@@ -673,11 +673,11 @@ receipt.
 Because the setting has no defined meaning, the value of the setting can be any
 value the implementation selects.
 
-Additional settings MAY be defined by extensions to HTTP/QUIC.
+Additional settings MAY be defined by extensions to HTTP/QWIK.
 
 #### Initialization
 
-When a 0-RTT QUIC connection is being used, the client's initial requests will
+When a 0-RTT QWIK connection is being used, the client's initial requests will
 be sent before the arrival of the server's SETTINGS frame.  Clients MUST store
 the settings the server provided in the session being resumed and MUST comply
 with stored settings until the server's current settings are received.
@@ -686,7 +686,7 @@ frame is received.
 
 A server can remember the settings that it advertised, or store an
 integrity-protected copy of the values in the ticket and recover the information
-when accepting 0-RTT data. A server uses the HTTP/QUIC settings values in
+when accepting 0-RTT data. A server uses the HTTP/QWIK settings values in
 determining whether to accept 0-RTT data.
 
 A server MAY accept 0-RTT and subsequently provide different settings in its
@@ -694,7 +694,7 @@ SETTINGS frame. If 0-RTT data is accepted by the server, its SETTINGS frame MUST
 NOT reduce any limits or alter any values that might be violated by the client
 with its 0-RTT data.
 
-When a 1-RTT QUIC connection is being used, the client MUST NOT send requests
+When a 1-RTT QWIK connection is being used, the client MUST NOT send requests
 prior to receiving and processing the server's SETTINGS frame.
 
 ### PUSH_PROMISE {#frame-push-promise}
@@ -767,7 +767,7 @@ close a connection.
 ~~~~~~~~~~
 {: #fig-goaway title="GOAWAY frame payload"}
 
-The GOAWAY frame carries a QUIC Stream ID for a client-initiated bidirectional
+The GOAWAY frame carries a QWIK Stream ID for a client-initiated bidirectional
 stream encoded as a variable-length integer.  A client MUST treat receipt of a
 GOAWAY frame containing a Stream ID of any other type as a connection error of
 type HTTP_MALFORMED_FRAME.
@@ -788,7 +788,7 @@ The MAX_PUSH_ID frame (type=0xD) is used by clients to control the number of
 server pushes that the server can initiate.  This sets the maximum value for a
 Push ID that the server can use in a PUSH_PROMISE frame.  Consequently, this
 also limits the number of push streams that the server can initiate in addition
-to the limit set by the QUIC MAX_STREAM_ID frame.
+to the limit set by the QWIK MAX_STREAM_ID frame.
 
 The MAX_PUSH_ID frame is always sent on a control stream.  Receipt of a
 MAX_PUSH_ID frame on any other stream MUST be treated as a connection error of
@@ -838,7 +838,7 @@ implementation chooses.
 
 ## HTTP Message Exchanges {#request-response}
 
-A client sends an HTTP request on a client-initiated bidirectional QUIC
+A client sends an HTTP request on a client-initiated bidirectional QWIK
 stream. A server sends an HTTP response on the same stream as the request.
 
 An HTTP message (request or response) consists of:
@@ -869,16 +869,16 @@ informational responses (1xx, see {{!RFC7231}}, Section 6.2) precede a final
 response to the same request.  Non-final responses do not contain a payload body
 or trailers.
 
-An HTTP request/response exchange fully consumes a bidirectional QUIC stream.
+An HTTP request/response exchange fully consumes a bidirectional QWIK stream.
 After sending a request, a client closes the stream for sending; after sending a
-final response, the server closes the stream for sending and the QUIC stream is
+final response, the server closes the stream for sending and the QWIK stream is
 fully closed.  Requests and responses are considered complete when the
-corresponding QUIC stream is closed in the appropriate direction.
+corresponding QWIK stream is closed in the appropriate direction.
 
 A server can send a complete response prior to the client sending an entire
 request if the response does not depend on any portion of the request that has
 not been sent and received. When this is true, a server MAY request that the
-client abort transmission of a request without error by triggering a QUIC
+client abort transmission of a request without error by triggering a QWIK
 STOP_SENDING frame with error code HTTP_EARLY_RESPONSE, sending a complete
 response, and cleanly closing its stream. Clients MUST NOT discard complete
 responses as a result of having their request terminated abruptly, though
@@ -902,24 +902,24 @@ Header Field" registry maintained at
 Just as in previous versions of HTTP, header field names are strings of ASCII
 characters that are compared in a case-insensitive fashion.  Properties of HTTP
 header field names and values are discussed in more detail in Section 3.2 of
-{{!RFC7230}}, though the wire rendering in HTTP/QUIC differs.  As in HTTP/2,
+{{!RFC7230}}, though the wire rendering in HTTP/QWIK differs.  As in HTTP/2,
 header field names MUST be converted to lowercase prior to their encoding.  A
 request or response containing uppercase header field names MUST be treated as
 malformed.
 
-As in HTTP/2, HTTP/QUIC uses special pseudo-header fields beginning with the ':'
+As in HTTP/2, HTTP/QWIK uses special pseudo-header fields beginning with the ':'
 character (ASCII 0x3a) to convey the target URI, the method of the request, and
 the status code for the response.  These pseudo-header fields are defined in
 Section 8.1.2.3 and 8.1.2.4 of {{!RFC7540}}. Pseudo-header fields are not HTTP
 header fields.  Endpoints MUST NOT generate pseudo-header fields other than
 those defined in {{!RFC7540}}.  The restrictions on the use of pseudo-header
-fields in Section 8.1.2.1 of {{!RFC7540}} also apply to HTTP/QUIC.
+fields in Section 8.1.2.1 of {{!RFC7540}} also apply to HTTP/QWIK.
 
-HTTP/QUIC uses QPACK header compression as described in [QPACK], a variation of
+HTTP/QWIK uses QPACK header compression as described in [QPACK], a variation of
 HPACK which allows the flexibility to avoid header-compression-induced
 head-of-line blocking.  See that document for additional details.
 
-An HTTP/QUIC implementation MAY impose a limit on the maximum size of the header
+An HTTP/QWIK implementation MAY impose a limit on the maximum size of the header
 it will accept on an individual HTTP message.  This limit is conveyed as a
 number of octets in the `SETTINGS_MAX_HEADER_LIST_SIZE` parameter.  The size of
 a header list is calculated based on the uncompressed size of header fields,
@@ -929,7 +929,7 @@ value SHOULD be treated as a stream error of type `HTTP_EXCESSIVE_LOAD`.
 
 ### Request Cancellation
 
-Either client or server can cancel requests by aborting the stream (QUIC
+Either client or server can cancel requests by aborting the stream (QWIK
 RST_STREAM and/or STOP_SENDING frames, as appropriate) with an error code of
 HTTP_REQUEST_CANCELLED ({{http-error-codes}}).  When the client cancels a
 response, it indicates that this response is no longer of interest.
@@ -963,7 +963,7 @@ an entire HTTP connection into a tunnel to a remote host. In HTTP/2, the CONNECT
 method is used to establish a tunnel over a single HTTP/2 stream to a remote
 host for similar purposes.
 
-A CONNECT request in HTTP/QUIC functions in the same manner as in HTTP/2. The
+A CONNECT request in HTTP/QWIK functions in the same manner as in HTTP/2. The
 request MUST be formatted as described in {{!RFC7540}}, Section 8.3. A CONNECT
 request that does not conform to these restrictions is malformed. The request
 stream MUST NOT be closed at the end of the request.
@@ -977,7 +977,7 @@ All DATA frames on the stream correspond to data sent or received on the TCP
 connection. Any DATA frame sent by the client is transmitted by the proxy to the
 TCP server; data received from the TCP server is packaged into DATA frames by
 the proxy. Note that the size and number of TCP segments is not guaranteed to
-map predictably to the size and number of HTTP DATA or QUIC STREAM frames.
+map predictably to the size and number of HTTP DATA or QWIK STREAM frames.
 
 The TCP connection can be closed by either peer. When the client ends the
 request stream (that is, the receive stream at the proxy enters the "Data Recvd"
@@ -992,11 +992,11 @@ A TCP connection error is signaled with RST_STREAM. A proxy treats any error in
 the TCP connection, which includes receiving a TCP segment with the RST bit set,
 as a stream error of type HTTP_CONNECT_ERROR ({{http-error-codes}}).
 Correspondingly, a proxy MUST send a TCP segment with the RST bit set if it
-detects an error with the stream or the QUIC connection.
+detects an error with the stream or the QWIK connection.
 
 ## Request Prioritization {#priority}
 
-HTTP/QUIC uses a priority scheme similar to that described in {{!RFC7540}},
+HTTP/QWIK uses a priority scheme similar to that described in {{!RFC7540}},
 Section 5.3. In this priority scheme, a given stream can be designated as
 dependent upon another request, which expresses the preference that the latter
 stream (the "parent" request) be allocated resources before the former stream
@@ -1026,7 +1026,7 @@ tree could safely be discarded. Clients could potentially reference closed
 streams long after the server had discarded state, leading to disparate views of
 the prioritization the client had attempted to express.
 
-In HTTP/QUIC, a number of placeholders are explicitly permitted by the server
+In HTTP/QWIK, a number of placeholders are explicitly permitted by the server
 using the `SETTINGS_NUM_PLACEHOLDERS` setting. Because the server commits to
 maintain these IDs in the tree, clients can use them with confidence that the
 server will not have discarded the state.
@@ -1077,7 +1077,7 @@ NOT declare a dependency on a stream it knows to have been closed.
 
 ## Server Push
 
-HTTP/QUIC server push is similar to what is described in HTTP/2 {{!RFC7540}},
+HTTP/QWIK server push is similar to what is described in HTTP/2 {{!RFC7540}},
 but uses different mechanisms.
 
 Each server push is identified by a unique Push ID. The same Push ID can be used
@@ -1106,27 +1106,27 @@ using the same format described for responses in {{request-response}}.
 
 If a promised server push is not needed by the client, the client SHOULD send a
 CANCEL_PUSH frame. If the push stream is already open or opens after sending the
-CANCEL_PUSH frame, a QUIC STOP_SENDING frame with an appropriate error code can
+CANCEL_PUSH frame, a QWIK STOP_SENDING frame with an appropriate error code can
 also be used (e.g., HTTP_PUSH_REFUSED, HTTP_PUSH_ALREADY_IN_CACHE; see
 {{errors}}). This asks the server not to transfer additional data and indicates
 that it will be discarded upon receipt.
 
 # Connection Closure
 
-Once established, an HTTP/QUIC connection can be used for many requests and
+Once established, an HTTP/QWIK connection can be used for many requests and
 responses over time until the connection is closed.  Connection closure can
 happen in any of several different ways.
 
 ## Idle Connections
 
-Each QUIC endpoint declares an idle timeout during the handshake.  If the
+Each QWIK endpoint declares an idle timeout during the handshake.  If the
 connection remains idle (no packets received) for longer than this duration, the
-peer will assume that the connection has been closed.  HTTP/QUIC implementations
+peer will assume that the connection has been closed.  HTTP/QWIK implementations
 will need to open a new connection for new requests if the existing connection
 has been idle for longer than the server's advertised idle timeout, and SHOULD
 do so if approaching the idle timeout.
 
-HTTP clients are expected to use QUIC PING frames to keep connections open while
+HTTP clients are expected to use QWIK PING frames to keep connections open while
 there are responses outstanding for requests or server pushes. If the client is
 not expecting a response from the server, allowing an idle connection to time
 out is preferred over expending effort maintaining a connection that might not
@@ -1149,8 +1149,8 @@ on lower stream IDs were or might be processed in this connection, while
 requests on the indicated stream ID and greater were not accepted. This enables
 client and server to agree on which requests were accepted prior to the
 connection shutdown.  This identifier MAY be lower than the stream limit
-identified by a QUIC MAX_STREAM_ID frame, and MAY be zero if no requests were
-processed.  Servers SHOULD NOT increase the QUIC MAX_STREAM_ID limit after
+identified by a QWIK MAX_STREAM_ID frame, and MAY be zero if no requests were
+processed.  Servers SHOULD NOT increase the QWIK MAX_STREAM_ID limit after
 sending a GOAWAY frame.
 
 Once sent, the server MUST cancel requests sent on streams with an identifier
@@ -1171,7 +1171,7 @@ successfully, reset individually, or the connection terminates.
 Servers SHOULD send a GOAWAY frame when the closing of a connection is known
 in advance, even if the advance notice is small, so that the remote peer can
 know whether a stream has been partially processed or not.  For example, if an
-HTTP client sends a POST at the same time that a server closes a QUIC
+HTTP client sends a POST at the same time that a server closes a QWIK
 connection, the client cannot know if the server started to process that POST
 request if the server does not send a GOAWAY frame to indicate what streams it
 might have acted on.
@@ -1182,7 +1182,7 @@ indicating different stream IDs, but MUST NOT increase the value they send in
 the last Stream ID, since clients might already have retried unprocessed
 requests on another connection.  A server that is attempting to gracefully shut
 down a connection SHOULD send an initial GOAWAY frame with the last Stream ID
-set to the current value of QUIC's MAX_STREAM_ID and SHOULD NOT increase the
+set to the current value of QWIK's MAX_STREAM_ID and SHOULD NOT increase the
 MAX_STREAM_ID thereafter.  This signals to the client that a shutdown is
 imminent and that initiating further requests is prohibited.  After allowing
 time for any in-flight requests (at least one round-trip time), the server MAY
@@ -1196,20 +1196,20 @@ HTTP_NO_ERROR code when closing the connection.
 
 ## Immediate Application Closure
 
-An HTTP/QUIC implementation can immediately close the QUIC connection at any
-time. This results in sending a QUIC APPLICATION_CLOSE frame to the peer; the
+An HTTP/QWIK implementation can immediately close the QWIK connection at any
+time. This results in sending a QWIK APPLICATION_CLOSE frame to the peer; the
 error code in this frame indicates to the peer why the connection is being
 closed.  See {{errors}} for error codes which can be used when closing a
 connection.
 
 Before closing the connection, a GOAWAY MAY be sent to allow the client to retry
-some requests.  Including the GOAWAY frame in the same packet as the QUIC
+some requests.  Including the GOAWAY frame in the same packet as the QWIK
 APPLICATION_CLOSE frame improves the chances of the frame being received by
 clients.
 
 ## Transport Closure
 
-For various reasons, the QUIC transport could indicate to the application layer
+For various reasons, the QWIK transport could indicate to the application layer
 that the connection has terminated.  This might be due to an explicit closure
 by the peer, a transport-level error, or a change in network topology which
 interrupts connectivity.
@@ -1217,12 +1217,12 @@ interrupts connectivity.
 If a connection terminates without a GOAWAY frame, clients MUST assume that any
 request which was sent, whether in whole or in part, might have been processed.
 
-# Extensions to HTTP/QUIC {#extensions}
+# Extensions to HTTP/QWIK {#extensions}
 
-HTTP/QUIC permits extension of the protocol.  Within the limitations described
+HTTP/QWIK permits extension of the protocol.  Within the limitations described
 in this section, protocol extensions can be used to provide additional services
 or alter any aspect of the protocol.  Extensions are effective only within the
-scope of a single HTTP/QUIC connection.
+scope of a single HTTP/QWIK connection.
 
 This applies to the protocol elements defined in this document.  This does not
 affect the existing options for extending HTTP, such as defining new methods,
@@ -1257,22 +1257,22 @@ extension is disabled if the setting is omitted.
 
 # Error Handling {#errors}
 
-QUIC allows the application to abruptly terminate (reset) individual streams or
+QWIK allows the application to abruptly terminate (reset) individual streams or
 the entire connection when an error is encountered.  These are referred to as
 "stream errors" or "connection errors" and are described in more detail in
-{{QUIC-TRANSPORT}}.  An endpoint MAY choose to treat a stream error as a
+{{QWIK-TRANSPORT}}.  An endpoint MAY choose to treat a stream error as a
 connection error.
 
-This section describes HTTP/QUIC-specific error codes which can be used to
+This section describes HTTP/QWIK-specific error codes which can be used to
 express the cause of a connection or stream error.
 
-## HTTP/QUIC Error Codes {#http-error-codes}
+## HTTP/QWIK Error Codes {#http-error-codes}
 
-The following error codes are defined for use in QUIC RST_STREAM, STOP_SENDING,
-and APPLICATION_CLOSE frames when using HTTP/QUIC.
+The following error codes are defined for use in QWIK RST_STREAM, STOP_SENDING,
+and APPLICATION_CLOSE frames when using HTTP/QWIK.
 
 STOPPING (0x00):
-: This value is reserved by the transport to be used in response to QUIC
+: This value is reserved by the transport to be used in response to QWIK
   STOP_SENDING frames.
 
 HTTP_NO_ERROR (0x01):
@@ -1304,7 +1304,7 @@ HTTP_EXCESSIVE_LOAD (0x08):
   generating excessive load.
 
 HTTP_VERSION_FALLBACK (0x09):
-: The requested operation cannot be served over HTTP/QUIC.  The peer should
+: The requested operation cannot be served over HTTP/QWIK.  The peer should
   retry over HTTP/1.1.
 
 HTTP_WRONG_STREAM (0x0A):
@@ -1349,13 +1349,13 @@ HTTP_MALFORMED_FRAME (0x01XX):
 
 # Security Considerations
 
-The security considerations of HTTP/QUIC should be comparable to those of HTTP/2
+The security considerations of HTTP/QWIK should be comparable to those of HTTP/2
 with TLS.  Note that where HTTP/2 employs PADDING frames and Padding fields in
-other frames to make a connection more resistant to traffic analysis, HTTP/QUIC
-can rely on QUIC PADDING frames or employ the reserved frame and stream types
+other frames to make a connection more resistant to traffic analysis, HTTP/QWIK
+can rely on QWIK PADDING frames or employ the reserved frame and stream types
 discussed in {{frame-grease}} and {{stream-grease}}.
 
-When HTTP Alternative Services is used for discovery for HTTP/QUIC endpoints,
+When HTTP Alternative Services is used for discovery for HTTP/QWIK endpoints,
 the security considerations of {{!ALTSVC}} also apply.
 
 Several protocol elements contain nested length elements, typically in the form
@@ -1367,16 +1367,16 @@ contains.
 
 # IANA Considerations
 
-## Registration of HTTP/QUIC Identification String
+## Registration of HTTP/QWIK Identification String
 
-This document creates a new registration for the identification of HTTP/QUIC in
+This document creates a new registration for the identification of HTTP/QWIK in
 the "Application Layer Protocol Negotiation (ALPN) Protocol IDs" registry
 established in {{?RFC7301}}.
 
-The "hq" string identifies HTTP/QUIC:
+The "hq" string identifies HTTP/QWIK:
 
   Protocol:
-  : HTTP/QUIC
+  : HTTP/QWIK
 
   Identification Sequence:
   : 0x68 0x71 ("hq")
@@ -1384,22 +1384,22 @@ The "hq" string identifies HTTP/QUIC:
   Specification:
   : This document
 
-## Registration of QUIC Version Hint Alt-Svc Parameter
+## Registration of QWIK Version Hint Alt-Svc Parameter
 
 This document creates a new registration for version-negotiation hints in the
 "Hypertext Transfer Protocol (HTTP) Alt-Svc Parameter" registry established in
 {{!RFC7838}}.
 
   Parameter:
-  : "quic"
+  : "qwik"
 
   Specification:
   : This document, {{alt-svc-version-hint}}
 
 ## Frame Types {#iana-frames}
 
-This document establishes a registry for HTTP/QUIC frame type codes. The
-"HTTP/QUIC Frame Type" registry manages an 8-bit space.  The "HTTP/QUIC Frame
+This document establishes a registry for HTTP/QWIK frame type codes. The
+"HTTP/QWIK Frame Type" registry manages an 8-bit space.  The "HTTP/QWIK Frame
 Type" registry operates under either of the "IETF Review" or "IESG Approval"
 policies {{?RFC8126}} for values from 0x00 up to and including 0xef, with values
 from 0xf0 up to and including 0xff being reserved for Experimental Use.
@@ -1452,8 +1452,8 @@ Specification:
 
 ## Settings Parameters {#iana-settings}
 
-This document establishes a registry for HTTP/QUIC settings.  The "HTTP/QUIC
-Settings" registry manages a 16-bit space.  The "HTTP/QUIC Settings" registry
+This document establishes a registry for HTTP/QWIK settings.  The "HTTP/QWIK
+Settings" registry manages a 16-bit space.  The "HTTP/QWIK Settings" registry
 operates under the "Expert Review" policy {{?RFC8126}} for values in the range
 from 0x0000 to 0xefff, with values between and 0xf000 and 0xffff being reserved
 for Experimental Use.  The designated experts are the same as those for the
@@ -1500,8 +1500,8 @@ Specification:
 
 ## Error Codes {#iana-error-codes}
 
-This document establishes a registry for HTTP/QUIC error codes.  The
-"HTTP/QUIC Error Code" registry manages a 16-bit space.  The "HTTP/QUIC
+This document establishes a registry for HTTP/QWIK error codes.  The
+"HTTP/QWIK Error Code" registry manages a 16-bit space.  The "HTTP/QWIK
 Error Code" registry operates under the "Expert Review" policy
 {{?RFC8126}}.
 
@@ -1530,7 +1530,7 @@ The entries in the following table are registered by this document.
 | ----------------------------------- | ---------- | ---------------------------------------- | ---------------------- |
 | Name                                | Code       | Description                              | Specification          |
 | ----------------------------------- | ---------- | ---------------------------------------- | ---------------------- |
-| STOPPING                            | 0x0000     | Reserved by QUIC                         | {{QUIC-TRANSPORT}}     |
+| STOPPING                            | 0x0000     | Reserved by QWIK                         | {{QWIK-TRANSPORT}}     |
 | HTTP_NO_ERROR                       | 0x0001     | No error                                 | {{http-error-codes}}   |
 | HTTP_PUSH_REFUSED                   | 0x0002     | Client refused pushed content            | {{http-error-codes}}   |
 | HTTP_INTERNAL_ERROR                 | 0x0003     | Internal error                           | {{http-error-codes}}   |
@@ -1554,8 +1554,8 @@ The entries in the following table are registered by this document.
 
 ## Stream Types {#iana-stream-types}
 
-This document establishes a registry for HTTP/QUIC unidirectional stream types.
-The "HTTP/QUIC Stream Type" registry manages an 8-bit space.  The "HTTP/QUIC
+This document establishes a registry for HTTP/QWIK unidirectional stream types.
+The "HTTP/QWIK Stream Type" registry manages an 8-bit space.  The "HTTP/QWIK
 Stream Type" registry operates under either of the "IETF Review" or "IESG
 Approval" policies {{?RFC8126}} for values from 0x00 up to and including 0xef,
 with values from 0xf0 up to and including 0xff being reserved for Experimental
@@ -1603,14 +1603,14 @@ Sender:
 
 # Considerations for Transitioning from HTTP/2
 
-HTTP/QUIC is strongly informed by HTTP/2, and bears many similarities.  This
-section describes the approach taken to design HTTP/QUIC, points out important
+HTTP/QWIK is strongly informed by HTTP/2, and bears many similarities.  This
+section describes the approach taken to design HTTP/QWIK, points out important
 differences from HTTP/2, and describes how to map HTTP/2 extensions into
-HTTP/QUIC.
+HTTP/QWIK.
 
-HTTP/QUIC begins from the premise that similarity to HTTP/2 is preferable,
-but not a hard requirement.  HTTP/QUIC departs from HTTP/2 primarily where
-necessary to accommodate the differences in behavior between QUIC and TCP (lack
+HTTP/QWIK begins from the premise that similarity to HTTP/2 is preferable,
+but not a hard requirement.  HTTP/QWIK departs from HTTP/2 primarily where
+necessary to accommodate the differences in behavior between QWIK and TCP (lack
 of ordering, support for streams).  We intend to avoid gratuitous changes which
 make it difficult or impossible to build extensions with the same semantics
 applicable to both protocols at once.
@@ -1619,33 +1619,33 @@ These departures are noted in this section.
 
 ## Streams {#h2-streams}
 
-HTTP/QUIC permits use of a larger number of streams (2^62-1) than HTTP/2.  The
+HTTP/QWIK permits use of a larger number of streams (2^62-1) than HTTP/2.  The
 considerations about exhaustion of stream identifier space apply, though the
-space is significantly larger such that it is likely that other limits in QUIC
+space is significantly larger such that it is likely that other limits in QWIK
 are reached first, such as the limit on the connection flow control window.
 
 ## HTTP Frame Types {#h2-frames}
 
-Many framing concepts from HTTP/2 can be elided away on QUIC, because the
+Many framing concepts from HTTP/2 can be elided away on QWIK, because the
 transport deals with them. Because frames are already on a stream, they can omit
-the stream number. Because frames do not block multiplexing (QUIC's multiplexing
+the stream number. Because frames do not block multiplexing (QWIK's multiplexing
 occurs below this layer), the support for variable-maximum-length packets can be
-removed. Because stream termination is handled by QUIC, an END_STREAM flag is
+removed. Because stream termination is handled by QWIK, an END_STREAM flag is
 not required.  This permits the removal of the Flags field from the generic
 frame layout.
 
-Frame payloads are largely drawn from {{!RFC7540}}. However, QUIC includes many
+Frame payloads are largely drawn from {{!RFC7540}}. However, QWIK includes many
 features (e.g. flow control) which are also present in HTTP/2. In these cases,
 the HTTP mapping does not re-implement them. As a result, several HTTP/2 frame
-types are not required in HTTP/QUIC. Where an HTTP/2-defined frame is no longer
+types are not required in HTTP/QWIK. Where an HTTP/2-defined frame is no longer
 used, the frame ID has been reserved in order to maximize portability between
-HTTP/2 and HTTP/QUIC implementations. However, even equivalent frames between
+HTTP/2 and HTTP/QWIK implementations. However, even equivalent frames between
 the two mappings are not identical.
 
 Many of the differences arise from the fact that HTTP/2 provides an absolute
-ordering between frames across all streams, while QUIC provides this guarantee
+ordering between frames across all streams, while QWIK provides this guarantee
 on each stream only.  As a result, if a frame type makes assumptions that frames
-from different streams will still be received in the order sent, HTTP/QUIC will
+from different streams will still be received in the order sent, HTTP/QWIK will
 break them.
 
 For example, implicit in the HTTP/2 prioritization scheme is the notion of
@@ -1654,40 +1654,40 @@ operations on the dependency tree such as reparenting a subtree are not
 commutative, both sender and receiver must apply them in the same order to
 ensure that both sides have a consistent view of the stream dependency tree.
 HTTP/2 specifies priority assignments in PRIORITY frames and (optionally) in
-HEADERS frames. To achieve in-order delivery of priority changes in HTTP/QUIC,
+HEADERS frames. To achieve in-order delivery of priority changes in HTTP/QWIK,
 PRIORITY frames are sent on the control stream and the PRIORITY section is
 removed from the HEADERS frame.
 
 Likewise, HPACK was designed with the assumption of in-order delivery. A
 sequence of encoded header blocks must arrive (and be decoded) at an endpoint in
 the same order in which they were encoded. This ensures that the dynamic state
-at the two endpoints remains in sync.  As a result, HTTP/QUIC uses a modified
+at the two endpoints remains in sync.  As a result, HTTP/QWIK uses a modified
 version of HPACK, described in [QPACK].
 
-Frame type definitions in HTTP/QUIC often use the QUIC variable-length integer
+Frame type definitions in HTTP/QWIK often use the QWIK variable-length integer
 encoding.  In particular, Stream IDs use this encoding, which allow for a larger
 range of possible values than the encoding used in HTTP/2.  Some frames in
-HTTP/QUIC use an identifier rather than a Stream ID (e.g. Push IDs in PRIORITY
+HTTP/QWIK use an identifier rather than a Stream ID (e.g. Push IDs in PRIORITY
 frames). Redefinition of the encoding of extension frame types might be
 necessary if the encoding includes a Stream ID.
 
-Because the Flags field is not present in generic HTTP/QUIC frames, those frames
+Because the Flags field is not present in generic HTTP/QWIK frames, those frames
 which depend on the presence of flags need to allocate space for flags as part
 of their frame payload.
 
 Other than this issue, frame type HTTP/2 extensions are typically portable to
-QUIC simply by replacing Stream 0 in HTTP/2 with a control stream in HTTP/QUIC.
-HTTP/QUIC extensions will not assume ordering, but would not be harmed by
+QWIK simply by replacing Stream 0 in HTTP/2 with a control stream in HTTP/QWIK.
+HTTP/QWIK extensions will not assume ordering, but would not be harmed by
 ordering, and would be portable to HTTP/2 in the same manner.
 
 Below is a listing of how each HTTP/2 frame type is mapped:
 
 DATA (0x0):
-: Padding is not defined in HTTP/QUIC frames.  See {{frame-data}}.
+: Padding is not defined in HTTP/QWIK frames.  See {{frame-data}}.
 
 HEADERS (0x1):
 : As described above, the PRIORITY region of HEADERS is not supported. A
-  separate PRIORITY frame MUST be used. Padding is not defined in HTTP/QUIC
+  separate PRIORITY frame MUST be used. Padding is not defined in HTTP/QWIK
   frames.  See {{frame-headers}}.
 
 PRIORITY (0x2):
@@ -1695,7 +1695,7 @@ PRIORITY (0x2):
   reference a variety of identifiers.  See {{frame-priority}}.
 
 RST_STREAM (0x3):
-: RST_STREAM frames do not exist, since QUIC provides stream lifecycle
+: RST_STREAM frames do not exist, since QWIK provides stream lifecycle
   management.  The same code point is used for the CANCEL_PUSH frame
   ({{frame-cancel-push}}).
 
@@ -1709,21 +1709,21 @@ PUSH_PROMISE (0x5):
   {{frame-push-promise}}.
 
 PING (0x6):
-: PING frames do not exist, since QUIC provides equivalent functionality.
+: PING frames do not exist, since QWIK provides equivalent functionality.
 
 GOAWAY (0x7):
 : GOAWAY is sent only from server to client and does not contain an error code.
   See {{frame-goaway}}.
 
 WINDOW_UPDATE (0x8):
-: WINDOW_UPDATE frames do not exist, since QUIC provides flow control.
+: WINDOW_UPDATE frames do not exist, since QWIK provides flow control.
 
 CONTINUATION (0x9):
 : CONTINUATION frames do not exist; instead, larger HEADERS/PUSH_PROMISE
   frames than HTTP/2 are permitted.
 
 Frame types defined by extensions to HTTP/2 need to be separately registered for
-HTTP/QUIC if still applicable.  The IDs of frames defined in {{!RFC7540}} have
+HTTP/QWIK if still applicable.  The IDs of frames defined in {{!RFC7540}} have
 been reserved for simplicity.  See {{iana-frames}}.
 
 ## HTTP/2 SETTINGS Parameters {#h2-settings}
@@ -1733,8 +1733,8 @@ beginning of the connection, and thereafter cannot change.  This eliminates
 many corner cases around synchronization of changes.
 
 Some transport-level options that HTTP/2 specifies via the SETTINGS frame are
-superseded by QUIC transport parameters in HTTP/QUIC. The HTTP-level options
-that are retained in HTTP/QUIC have the same value as in HTTP/2.
+superseded by QWIK transport parameters in HTTP/QWIK. The HTTP-level options
+that are retained in HTTP/QWIK have the same value as in HTTP/2.
 
 Below is a listing of how each HTTP/2 SETTINGS parameter is mapped:
 
@@ -1746,38 +1746,38 @@ SETTINGS_ENABLE_PUSH:
   control over server push.
 
 SETTINGS_MAX_CONCURRENT_STREAMS:
-: QUIC controls the largest open Stream ID as part of its flow control logic.
+: QWIK controls the largest open Stream ID as part of its flow control logic.
   Specifying SETTINGS_MAX_CONCURRENT_STREAMS in the SETTINGS frame is an error.
 
 SETTINGS_INITIAL_WINDOW_SIZE:
-: QUIC requires both stream and connection flow control window sizes to be
+: QWIK requires both stream and connection flow control window sizes to be
   specified in the initial transport handshake.  Specifying
   SETTINGS_INITIAL_WINDOW_SIZE in the SETTINGS frame is an error.
 
 SETTINGS_MAX_FRAME_SIZE:
-: This setting has no equivalent in HTTP/QUIC.  Specifying it in the SETTINGS
+: This setting has no equivalent in HTTP/QWIK.  Specifying it in the SETTINGS
   frame is an error.
 
 SETTINGS_MAX_HEADER_LIST_SIZE:
 : See {{settings-parameters}}.
 
-In HTTP/QUIC, setting values are variable-length integers (6, 14, 30, or 62 bits
+In HTTP/QWIK, setting values are variable-length integers (6, 14, 30, or 62 bits
 long) rather than fixed-length 32-bit fields as in HTTP/2.  This will often
 produce a shorter encoding, but can produce a longer encoding for settings which
 use the full 32-bit space.  Settings ported from HTTP/2 might choose to redefine
 the format of their settings to avoid using the 62-bit encoding.
 
-Settings need to be defined separately for HTTP/2 and HTTP/QUIC.  The IDs of
+Settings need to be defined separately for HTTP/2 and HTTP/QWIK.  The IDs of
 settings defined in {{!RFC7540}} have been reserved for simplicity.  See
 {{iana-settings}}.
 
 
 ## HTTP/2 Error Codes
 
-QUIC has the same concepts of "stream" and "connection" errors that HTTP/2
+QWIK has the same concepts of "stream" and "connection" errors that HTTP/2
 provides. However, there is no direct portability of HTTP/2 error codes.
 
-The HTTP/2 error codes defined in Section 7 of {{!RFC7540}} map to the HTTP/QUIC
+The HTTP/2 error codes defined in Section 7 of {{!RFC7540}} map to the HTTP/QWIK
 error codes as follows:
 
 NO_ERROR (0x0):
@@ -1791,22 +1791,22 @@ INTERNAL_ERROR (0x2):
 : HTTP_INTERNAL_ERROR in {{http-error-codes}}.
 
 FLOW_CONTROL_ERROR (0x3):
-: Not applicable, since QUIC handles flow control.  Would provoke a
-  QUIC_FLOW_CONTROL_RECEIVED_TOO_MUCH_DATA from the QUIC layer.
+: Not applicable, since QWIK handles flow control.  Would provoke a
+  QWIK_FLOW_CONTROL_RECEIVED_TOO_MUCH_DATA from the QWIK layer.
 
 SETTINGS_TIMEOUT (0x4):
 : Not applicable, since no acknowledgement of SETTINGS is defined.
 
 STREAM_CLOSED (0x5):
-: Not applicable, since QUIC handles stream management.  Would provoke a
-  QUIC_STREAM_DATA_AFTER_TERMINATION from the QUIC layer.
+: Not applicable, since QWIK handles stream management.  Would provoke a
+  QWIK_STREAM_DATA_AFTER_TERMINATION from the QWIK layer.
 
 FRAME_SIZE_ERROR (0x6):
 : HTTP_MALFORMED_FRAME error codes defined in {{http-error-codes}}.
 
 REFUSED_STREAM (0x7):
-: Not applicable, since QUIC handles stream management.  Would provoke a
-  STREAM_ID_ERROR from the QUIC layer.
+: Not applicable, since QWIK handles stream management.  Would provoke a
+  STREAM_ID_ERROR from the QWIK layer.
 
 CANCEL (0x8):
 : HTTP_REQUEST_CANCELLED in {{http-error-codes}}.
@@ -1821,13 +1821,13 @@ ENHANCE_YOUR_CALM (0xb):
 : HTTP_EXCESSIVE_LOAD in {{http-error-codes}}.
 
 INADEQUATE_SECURITY (0xc):
-: Not applicable, since QUIC is assumed to provide sufficient security on all
+: Not applicable, since QWIK is assumed to provide sufficient security on all
   connections.
 
 HTTP_1_1_REQUIRED (0xd):
 : HTTP_VERSION_FALLBACK in {{http-error-codes}}.
 
-Error codes need to be defined for HTTP/2 and HTTP/QUIC separately.  See
+Error codes need to be defined for HTTP/2 and HTTP/QWIK separately.  See
 {{iana-error-codes}}.
 
 # Change Log
@@ -1841,7 +1841,7 @@ Substantial editorial reorganization; no technical changes.
 
 ## Since draft-ietf-quic-http-14
 
-- Recommend sensible values for QUIC transport parameters (#1720,#1806)
+- Recommend sensible values for QWIK transport parameters (#1720,#1806)
 - Define error for missing SETTINGS frame (#1697,#1808)
 - Setting values are variable-length integers (#1556,#1807) and do not have
   separate maximum values (#1820)
@@ -1861,7 +1861,7 @@ Substantial editorial reorganization; no technical changes.
 
 - TLS SNI extension isn't mandatory if an alternative method is used (#1459,
   #1462, #1466)
-- Removed flags from HTTP/QUIC frames (#1388, #1398)
+- Removed flags from HTTP/QWIK frames (#1388, #1398)
 - Reserved frame types and settings for use in preserving extensibility (#1333,
   #1446)
 - Added general error code (#1391, #1397)
@@ -1891,19 +1891,19 @@ Substantial editorial reorganization; no technical changes.
 
 ## Since draft-ietf-quic-http-07
 
-- Changes for integer encodings in QUIC (#595,#905)
+- Changes for integer encodings in QWIK (#595,#905)
 - Use unidirectional streams as appropriate (#515, #240, #281, #886)
 - Improvement to the description of GOAWAY (#604, #898)
 - Improve description of server push usage (#947, #950, #957)
 
 ## Since draft-ietf-quic-http-06
 
-- Track changes in QUIC error code usage (#485)
+- Track changes in QWIK error code usage (#485)
 
 ## Since draft-ietf-quic-http-05
 
 - Made push ID sequential, add MAX_PUSH_ID, remove SETTINGS_ENABLE_PUSH (#709)
-- Guidance about keep-alive and QUIC PINGs (#729)
+- Guidance about keep-alive and QWIK PINGs (#729)
 - Expanded text on GOAWAY and cancellation (#757)
 
 ## Since draft-ietf-quic-http-04
@@ -1943,7 +1943,7 @@ None.
 
 ## Since draft-ietf-quic-http-00
 
-- Changed "HTTP/2-over-QUIC" to "HTTP/QUIC" throughout (#11,#29)
+- Changed "HTTP/2-over-QWIK" to "HTTP/QWIK" throughout (#11,#29)
 - Changed from using HTTP/2 framing within Stream 3 to new framing format and
   two-stream-per-request model (#71,#72,#73)
 - Adopted SETTINGS format from draft-bishop-httpbis-extended-settings-01

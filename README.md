@@ -1,9 +1,9 @@
-# QUIC Protocol
+# QWIK Protocol
 
 This is the working area for the IETF QUIC Working Group documents for the
-QUIC protocol suite.
+QWIK protocol suite.
 
-## QUIC Invariants
+## QWIK Invariants
 
 * [Editor's copy](https://quicwg.github.io/base-drafts/draft-ietf-quic-invariants.html)
 * [Working Group Draft](https://tools.ietf.org/html/draft-ietf-quic-invariants)

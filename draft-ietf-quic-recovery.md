@@ -1,12 +1,12 @@
 ---
-title: QUIC Loss Detection and Congestion Control
-abbrev: QUIC Loss Detection
+title: QWIK Loss Detection and Congestion Control
+abbrev: QWIK Loss Detection
 docname: draft-ietf-quic-recovery-latest
 date: {DATE}
 category: std
 ipr: trust200902
 area: Transport
-workgroup: QUIC
+workgroup: QWIK
 
 stand_alone: yes
 pi: [toc, sortrefs, symrefs, docmapping]
@@ -27,8 +27,8 @@ author:
 
 normative:
 
-  QUIC-TRANSPORT:
-    title: "QUIC: A UDP-Based Multiplexed and Secure Transport"
+  QWIK-TRANSPORT:
+    title: "QWIK: A UDP-Based Multiplexed and Secure Transport"
     date: {DATE}
     seriesinfo:
       Internet-Draft: draft-ietf-quic-transport-latest
@@ -51,11 +51,11 @@ informative:
 --- abstract
 
 This document describes loss detection and congestion control mechanisms for
-QUIC.
+QWIK.
 
 --- note_Note_to_Readers
 
-Discussion of this draft takes place on the QUIC working group mailing list
+Discussion of this draft takes place on the QWIK working group mailing list
 (quic@ietf.org), which is archived at
 <https://mailarchive.ietf.org/arch/search/?email_list=quic>.
 
@@ -67,14 +67,14 @@ code and issues list for this draft can be found at
 
 # Introduction
 
-QUIC is a new multiplexed and secure transport atop UDP.  QUIC builds on decades
+QWIK is a new multiplexed and secure transport atop UDP.  QWIK builds on decades
 of transport and security experience, and implements mechanisms that make it
-attractive as a modern general-purpose transport.  The QUIC protocol is
-described in {{QUIC-TRANSPORT}}.
+attractive as a modern general-purpose transport.  The QWIK protocol is
+described in {{QWIK-TRANSPORT}}.
 
-QUIC implements the spirit of known TCP loss recovery mechanisms, described in
+QWIK implements the spirit of known TCP loss recovery mechanisms, described in
 RFCs, various Internet-drafts, and also those prevalent in the Linux TCP
-implementation.  This document describes QUIC congestion control and loss
+implementation.  This document describes QWIK congestion control and loss
 recovery, and where applicable, attributes the TCP equivalent in RFCs,
 Internet-drafts, academic papers, and/or TCP implementations.
 
@@ -113,20 +113,20 @@ Crypto Packets:
 : Packets containing CRYPTO data sent in Initial or Handshake
   packets.
 
-# Design of the QUIC Transmission Machinery
+# Design of the QWIK Transmission Machinery
 
-All transmissions in QUIC are sent with a packet-level header, which indicates
+All transmissions in QWIK are sent with a packet-level header, which indicates
 the encryption level and includes a packet sequence number (referred to below as
 a packet number).  The encryption level indicates the packet number space, as
-described in {{QUIC-TRANSPORT}}.  Packet numbers never repeat within a packet
+described in {{QWIK-TRANSPORT}}.  Packet numbers never repeat within a packet
 number space for the lifetime of a connection.  Packet numbers monotonically
 increase within a space, preventing ambiguity.
 
 This design obviates the need for disambiguating between transmissions and
-retransmissions and eliminates significant complexity from QUIC's interpretation
+retransmissions and eliminates significant complexity from QWIK's interpretation
 of TCP loss detection mechanisms.
 
-QUIC packets can contain multiple frames of different types. The recovery
+QWIK packets can contain multiple frames of different types. The recovery
 mechanisms ensure that data and frames that need reliable delivery are
 acknowledged or declared lost and sent in new packets as necessary. The types
 of frames contained in a packet affect recovery and congestion control logic:
@@ -135,7 +135,7 @@ of frames contained in a packet affect recovery and congestion control logic:
   and PADDING frames are not acknowledged immediately.
 
 * Long header packets that contain CRYPTO frames are critical to the
-  performance of the QUIC handshake and use shorter timers for
+  performance of the QWIK handshake and use shorter timers for
   acknowledgement and retransmission.
 
 * Packets that contain only ACK frames do not count toward
@@ -143,16 +143,16 @@ of frames contained in a packet affect recovery and congestion control logic:
   means PADDING frames cause packets to contribute toward bytes in flight
   without directly causing an acknowledgment to be sent.
 
-## Relevant Differences Between QUIC and TCP
+## Relevant Differences Between QWIK and TCP
 
 Readers familiar with TCP's loss detection and congestion control will find
 algorithms here that parallel well-known TCP ones. Protocol differences between
-QUIC and TCP however contribute to algorithmic differences. We briefly describe
+QWIK and TCP however contribute to algorithmic differences. We briefly describe
 these protocol differences below.
 
 ### Separate Packet Number Spaces
 
-QUIC uses separate packet number spaces for each encryption level, except 0-RTT
+QWIK uses separate packet number spaces for each encryption level, except 0-RTT
 and all generations of 1-RTT keys use the same packet number space.  Separate
 packet number spaces ensures acknowledgement of packets sent with one level of
 encryption will not cause spurious retransmission of packets sent with a
@@ -164,51 +164,51 @@ across packet number spaces.
 TCP conflates transmission sequence number at the sender with delivery sequence
 number at the receiver, which results in retransmissions of the same data
 carrying the same sequence number, and consequently to problems caused by
-"retransmission ambiguity".  QUIC separates the two: QUIC uses a packet number
+"retransmission ambiguity".  QWIK separates the two: QWIK uses a packet number
 for transmissions, and any application data is sent in one or more streams,
 with delivery order determined by stream offsets encoded within STREAM frames.
 
-QUIC's packet number is strictly increasing, and directly encodes transmission
-order.  A higher QUIC packet number signifies that the packet was sent later,
-and a lower QUIC packet number signifies that the packet was sent earlier.  When
-a packet containing frames is deemed lost, QUIC rebundles necessary frames in a
+QWIK's packet number is strictly increasing, and directly encodes transmission
+order.  A higher QWIK packet number signifies that the packet was sent later,
+and a lower QWIK packet number signifies that the packet was sent earlier.  When
+a packet containing frames is deemed lost, QWIK rebundles necessary frames in a
 new packet with a new packet number, removing ambiguity about which packet is
 acknowledged when an ACK is received.  Consequently, more accurate RTT
 measurements can be made, spurious retransmissions are trivially detected, and
 mechanisms such as Fast Retransmit can be applied universally, based only on
 packet number.
 
-This design point significantly simplifies loss detection mechanisms for QUIC.
+This design point significantly simplifies loss detection mechanisms for QWIK.
 Most TCP mechanisms implicitly attempt to infer transmission ordering based on
 TCP sequence numbers - a non-trivial task, especially when TCP timestamps are
 not available.
 
 ### No Reneging
 
-QUIC ACKs contain information that is similar to TCP SACK, but QUIC does not
+QWIK ACKs contain information that is similar to TCP SACK, but QWIK does not
 allow any acked packet to be reneged, greatly simplifying implementations on
 both sides and reducing memory pressure on the sender.
 
 ### More ACK Ranges
 
-QUIC supports many ACK ranges, opposed to TCP's 3 SACK ranges.  In high loss
+QWIK supports many ACK ranges, opposed to TCP's 3 SACK ranges.  In high loss
 environments, this speeds recovery, reduces spurious retransmits, and ensures
 forward progress without relying on timeouts.
 
 ### Explicit Correction For Delayed ACKs
 
-QUIC ACKs explicitly encode the delay incurred at the receiver between when a
+QWIK ACKs explicitly encode the delay incurred at the receiver between when a
 packet is received and when the corresponding ACK is sent.  This allows the
 receiver of the ACK to adjust for receiver delays, specifically the delayed ack
 timer, when estimating the path RTT.  This mechanism also allows a receiver to
 measure and report the delay from when a packet was received by the OS kernel,
 which is useful in receivers which may incur delays such as context-switch
-latency before a userspace QUIC receiver processes a received packet.
+latency before a userspace QWIK receiver processes a received packet.
 
 
 # Loss Detection
 
-QUIC senders use both ack information and timeouts to detect lost packets, and
+QWIK senders use both ack information and timeouts to detect lost packets, and
 this section provides a description of these algorithms. Estimating the network
 round-trip time (RTT) is critical to these algorithms and is described first.
 
@@ -222,7 +222,7 @@ RTT as long as the result is larger than the Min RTT.  If the result is smaller
 than the min_rtt, the RTT should be used, but the ack delay field should be
 ignored.
 
-Like TCP, QUIC calculates both smoothed RTT and RTT variance similar to those
+Like TCP, QWIK calculates both smoothed RTT and RTT variance similar to those
 specified in {{?RFC6298}}.
 
 Min RTT is the minimum RTT measured over the connection, prior to adjusting by
@@ -234,7 +234,7 @@ underestimation of min RTT, which in turn prevents underestimating smoothed RTT.
 Ack-based loss detection implements the spirit of TCP's Fast Retransmit
 {{?RFC5681}}, Early Retransmit {{?RFC5827}}, FACK, and SACK loss recovery
 {{?RFC6675}}. This section provides an overview of how these algorithms are
-implemented in QUIC.
+implemented in QWIK.
 
 ### Fast Retransmit
 
@@ -251,9 +251,9 @@ degrees of reordering, causing a sender to detect spurious losses. Spuriously
 declaring packets lost leads to unnecessary retransmissions and may result in
 degraded performance due to the actions of the congestion controller upon
 detecting loss. Implementers MAY use algorithms developed for TCP, such as
-TCP-NCR {{?RFC4653}}, to improve QUIC's reordering resilience.
+TCP-NCR {{?RFC4653}}, to improve QWIK's reordering resilience.
 
-QUIC implementations can use time-based loss detection to handle reordering
+QWIK implementations can use time-based loss detection to handle reordering
 based on time elapsed since the packet was sent.  This may be used either as
 a replacement for a packet reordering threshold or in addition to it.
 The RECOMMENDED time threshold, expressed as a fraction of the
@@ -305,7 +305,7 @@ Retransmission Timeout mechanisms.
 
 ### Crypto Handshake Timeout
 
-Data in CRYPTO frames is critical to QUIC transport and crypto negotiation, so a
+Data in CRYPTO frames is critical to QWIK transport and crypto negotiation, so a
 more aggressive timeout is used to retransmit it.
 
 The initial crypto retransmission timeout SHOULD be set to twice the initial
@@ -356,7 +356,7 @@ conditions:
 * If RTO ({{rto}}) is earlier, schedule a TLP in its place. That is,
   PTO SHOULD be scheduled for min(RTO, PTO).
 
-QUIC includes MaxAckDelay in all probe timeouts, because it assumes the ack
+QWIK includes MaxAckDelay in all probe timeouts, because it assumes the ack
 delay may come into play, regardless of the number of packets outstanding.
 TCP's TLP assumes if at least 2 packets are outstanding, acks will not be
 delayed.
@@ -384,7 +384,7 @@ packet.
 ### Retransmission Timeout {#rto}
 
 A Retransmission Timeout (RTO) timer is the final backstop for loss
-detection. The algorithm used in QUIC is based on the RTO algorithm for TCP
+detection. The algorithm used in QWIK is based on the RTO algorithm for TCP
 {{?RFC5681}} and is additionally resilient to spurious RTO events {{?RFC5682}}.
 
 When the last TLP packet is sent, a timer is set for the RTO period. When
@@ -406,14 +406,14 @@ the connection very sensitive to single packet loss. Sending two packets instead
 of one significantly increases resilience to packet drop in both directions,
 thus reducing the probability of consecutive RTO events.
 
-QUIC's RTO algorithm differs from TCP in that the firing of an RTO timer is not
+QWIK's RTO algorithm differs from TCP in that the firing of an RTO timer is not
 considered a strong enough signal of packet loss, so does not result in an
 immediate change to congestion window or recovery state. An RTO timer expires
 only when there's a prolonged period of network silence, which could be caused
 by a change in the underlying network RTT.
 
-QUIC also diverges from TCP by including MaxAckDelay in the RTO period. Since
-QUIC corrects for this delay in its SRTT and RTTVAR computations, it is
+QWIK also diverges from TCP by including MaxAckDelay in the RTO period. Since
+QWIK corrects for this delay in its SRTT and RTTVAR computations, it is
 necessary to add this delay explicitly in the TLP and RTO computation.
 
 When an acknowledgment is received for a packet sent on an RTO event, any
@@ -433,7 +433,7 @@ flight, since this packet adds network load without establishing packet loss.
 
 ## Generating Acknowledgements
 
-QUIC SHOULD delay sending acknowledgements in response to packets, but MUST NOT
+QWIK SHOULD delay sending acknowledgements in response to packets, but MUST NOT
 excessively delay acknowledgements of packets containing frames other than ACK.
 Specifically, implementations MUST attempt to enforce a maximum
 ack delay to avoid causing the peer spurious timeouts.  The maximum ack delay
@@ -441,7 +441,7 @@ is communicated in the `max_ack_delay` transport parameter and the default
 value is 25ms.
 
 An acknowledgement SHOULD be sent immediately upon receipt of a second
-packet but the delay SHOULD NOT exceed the maximum ack delay. QUIC recovery
+packet but the delay SHOULD NOT exceed the maximum ack delay. QWIK recovery
 algorithms do not assume the peer generates an acknowledgement immediately when
 receiving a second full-packet.
 
@@ -651,12 +651,12 @@ are as follows:
   bytes in flight.
 
 * is_crypto_packet: A boolean that indicates whether the packet contains
-  cryptographic handshake messages critical to the completion of the QUIC
-  handshake. In this version of QUIC, this includes any packet with the long
+  cryptographic handshake messages critical to the completion of the QWIK
+  handshake. In this version of QWIK, this includes any packet with the long
   header that includes a CRYPTO frame.
 
 * sent_bytes: The number of bytes sent in the packet, not including UDP or IP
-  overhead, but including QUIC framing overhead.
+  overhead, but including QWIK framing overhead.
 
 Pseudocode for OnPacketSent follows:
 
@@ -758,7 +758,7 @@ Pseudocode for OnPacketAcked follows:
 
 ### Setting the Loss Detection Timer
 
-QUIC loss detection uses a single timer for all timer-based loss detection.  The
+QWIK loss detection uses a single timer for all timer-based loss detection.  The
 duration of the timer is based on the timer's mode, which is set in the packet
 and timer events further below.  The function SetLossDetectionTimer defined
 below shows how the single timer is set.
@@ -772,7 +772,7 @@ When stateless rejects are in use, the connection is considered immediately
 closed once a reject is sent, so no timer is set to retransmit the reject.
 
 Version negotiation packets are always stateless, and MUST be sent once per
-handshake packet that uses an unsupported QUIC version, and MAY be sent in
+handshake packet that uses an unsupported QWIK version, and MAY be sent in
 response to 0-RTT packets.
 
 #### Tail Loss Probe and Retransmission Timer
@@ -789,7 +789,7 @@ sent, and then the RTO timer is set.
 #### Early Retransmit Timer
 
 Early retransmit {{?RFC5827}} is implemented with a 1/4 RTT timer. It is
-part of QUIC's time based loss detection, but is always enabled, even when
+part of QWIK's time based loss detection, but is always enabled, even when
 only packet reordering loss detection is enabled.
 
 #### Pseudocode
@@ -838,7 +838,7 @@ Pseudocode for SetLossDetectionTimer follows:
 
 ### On Timeout
 
-QUIC uses one loss recovery timer, which when set, can be in one of several
+QWIK uses one loss recovery timer, which when set, can be in one of several
 modes.  When the timer expires, the mode determines the action to be performed.
 
 Pseudocode for OnLossDetectionTimeout follows:
@@ -868,7 +868,7 @@ Pseudocode for OnLossDetectionTimeout follows:
 
 ### Detecting Lost Packets
 
-Packets in QUIC are only considered lost once a larger packet number in
+Packets in QWIK are only considered lost once a larger packet number in
 the same packet number space is acknowledged.  DetectLostPackets is called
 every time an ack is received and operates on the sent_packets for that
 packet number space.  If the loss detection timer expires and the loss_time
@@ -924,23 +924,23 @@ both the median and mean min_rtt typically observed on the public internet.
 
 # Congestion Control
 
-QUIC's congestion control is based on TCP NewReno {{?RFC6582}}.  NewReno is
-a congestion window based congestion control.  QUIC specifies the congestion
+QWIK's congestion control is based on TCP NewReno {{?RFC6582}}.  NewReno is
+a congestion window based congestion control.  QWIK specifies the congestion
 window in bytes rather than packets due to finer control and the ease of
 appropriate byte counting {{?RFC3465}}.
 
-QUIC hosts MUST NOT send packets if they would increase bytes_in_flight
+QWIK hosts MUST NOT send packets if they would increase bytes_in_flight
 (defined in {{vars-of-interest}}) beyond the available congestion window,
 unless the packet is a probe packet sent after the TLP or RTO timer expires,
 as described in {{tlp}} and {{rto}}.
 
 Implementations MAY use other congestion control algorithms, and endpoints MAY
-use different algorithms from one another. The signals QUIC provides for
+use different algorithms from one another. The signals QWIK provides for
 congestion control are generic and are designed to support different algorithms.
 
 ## Explicit Congestion Notification {#congestion-ecn}
 
-If a path has been verified to support ECN, QUIC treats a Congestion Experienced
+If a path has been verified to support ECN, QWIK treats a Congestion Experienced
 codepoint in the IP header as a signal of congestion. This document specifies an
 endpoint's response when its peer receives packets with the Congestion
 Experienced codepoint.  As discussed in {{!RFC8311}}, endpoints are permitted to
@@ -948,10 +948,10 @@ experiment with other response functions.
 
 ## Slow Start
 
-QUIC begins every connection in slow start and exits slow start upon loss or
-upon increase in the ECN-CE counter. QUIC re-enters slow start anytime the
+QWIK begins every connection in slow start and exits slow start upon loss or
+upon increase in the ECN-CE counter. QWIK re-enters slow start anytime the
 congestion window is less than ssthresh, which typically only occurs after an
-RTO. While in slow start, QUIC increases the congestion window by the number of
+RTO. While in slow start, QWIK increases the congestion window by the number of
 bytes acknowledged when each ack is processed.
 
 
@@ -967,7 +967,7 @@ congestion window.
 ## Recovery Period
 
 Recovery is a period of time beginning with detection of a lost packet or an
-increase in the ECN-CE counter. Because QUIC retransmits stream data and control
+increase in the ECN-CE counter. Because QWIK retransmits stream data and control
 frames, not packets, it defines the end of recovery as a packet sent after the
 start of recovery being acknowledged. This is slightly different from TCP's
 definition of recovery, which ends when the lost packet that started recovery is
@@ -1057,7 +1057,7 @@ bytes_in_flight:
 : The sum of the size in bytes of all sent packets that contain at least
   one retransmittable or PADDING frame, and have not been acked or declared
   lost. The size does not include IP or UDP overhead, but does include the
-  QUIC header and AEAD overhead.
+  QWIK header and AEAD overhead.
   Packets only containing ACK frames do not count towards bytes_in_flight
   to ensure congestion control does not impede congestion feedback.
 
@@ -1065,8 +1065,8 @@ congestion_window:
 : Maximum number of bytes-in-flight that may be sent.
 
 end_of_recovery:
-: The largest packet number sent when QUIC detects a loss.  When a larger
-  packet is acknowledged, QUIC exits recovery.
+: The largest packet number sent when QWIK detects a loss.  When a larger
+  packet is acknowledged, QWIK exits recovery.
 
 ssthresh:
 : Slow start threshold in bytes.  When the congestion window is below
@@ -1171,7 +1171,7 @@ are detected lost.
 
 ### On Retransmission Timeout Verified
 
-QUIC decreases the congestion window to the minimum value once the
+QWIK decreases the congestion window to the minimum value once the
 retransmission timeout has been verified and removes any packets
 sent before the newly acknowledged RTO packet.
 

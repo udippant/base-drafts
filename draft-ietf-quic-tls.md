@@ -1,12 +1,12 @@
 ---
-title: Using Transport Layer Security (TLS) to Secure QUIC
-abbrev: QUIC over TLS
+title: Using Transport Layer Security (TLS) to Secure QWIK
+abbrev: QWIK over TLS
 docname: draft-ietf-quic-tls-latest
 date: {DATE}
 category: std
 ipr: trust200902
 area: Transport
-workgroup: QUIC
+workgroup: QWIK
 
 stand_alone: yes
 pi: [toc, sortrefs, symrefs, docmapping]
@@ -27,8 +27,8 @@ author:
 
 normative:
 
-  QUIC-TRANSPORT:
-    title: "QUIC: A UDP-Based Multiplexed and Secure Transport"
+  QWIK-TRANSPORT:
+    title: "QWIK: A UDP-Based Multiplexed and Secure Transport"
     date: {DATE}
     seriesinfo:
       Internet-Draft: draft-ietf-quic-transport-latest
@@ -44,8 +44,8 @@ normative:
         org: Mozilla
         role: editor
 
-  QUIC-RECOVERY:
-    title: "QUIC Loss Detection and Congestion Control"
+  QWIK-RECOVERY:
+    title: "QWIK Loss Detection and Congestion Control"
     date: {DATE}
     seriesinfo:
       Internet-Draft: draft-ietf-quic-recovery-latest
@@ -80,8 +80,8 @@ informative:
     seriesinfo:
       ISBN: 978-1466570269
 
-  QUIC-HTTP:
-    title: "Hypertext Transfer Protocol (HTTP) over QUIC"
+  QWIK-HTTP:
+    title: "Hypertext Transfer Protocol (HTTP) over QWIK"
     date: {DATE}
     seriesinfo:
       Internet-Draft: draft-ietf-quic-http-latest
@@ -96,11 +96,11 @@ informative:
 --- abstract
 
 This document describes how Transport Layer Security (TLS) is used to secure
-QUIC.
+QWIK.
 
 --- note_Note_to_Readers
 
-Discussion of this draft takes place on the QUIC working group mailing list
+Discussion of this draft takes place on the QWIK working group mailing list
 (quic@ietf.org), which is archived at
 <https://mailarchive.ietf.org/arch/search/?email_list=quic>.
 
@@ -112,7 +112,7 @@ code and issues list for this draft can be found at
 
 # Introduction
 
-This document describes how QUIC {{QUIC-TRANSPORT}} is secured using Transport
+This document describes how QWIK {{QWIK-TRANSPORT}} is secured using Transport
 Layer Security (TLS) version 1.3 {{!TLS13=RFC8446}}.  TLS 1.3 provides critical
 latency improvements for connection establishment over previous versions.
 Absent packet loss, most new connections can be established and secured within a
@@ -121,7 +121,7 @@ the client can often send application data immediately, that is, using a zero
 round trip setup.
 
 This document describes how the standardized TLS 1.3 acts as a security
-component of QUIC.
+component of QWIK.
 
 
 # Notational Conventions
@@ -131,7 +131,7 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD",
 document are to be interpreted as described in BCP 14 {{!RFC2119}} {{!RFC8174}}
 when, and only when, they appear in all capitals, as shown here.
 
-This document uses the terminology established in {{QUIC-TRANSPORT}}.
+This document uses the terminology established in {{QWIK-TRANSPORT}}.
 
 For brevity, the acronym TLS is used to refer to TLS 1.3.
 
@@ -161,7 +161,7 @@ series of typed TLS records. Records are individually cryptographically
 protected and then transmitted over a reliable transport (typically TCP) which
 provides sequencing and guaranteed delivery.
 
-Change Cipher Spec records cannot be sent in QUIC.
+Change Cipher Spec records cannot be sent in QWIK.
 
 The TLS authenticated key exchange occurs between two entities: client and
 server.  The client initiates the exchange and the server responds.  If the key
@@ -178,7 +178,7 @@ learn and authenticate an identity for the client.  TLS supports X.509
 The TLS key exchange is resistant to tampering by attackers and it produces
 shared secrets that cannot be controlled by either participating peer.
 
-TLS 1.3 provides two basic handshake modes of interest to QUIC:
+TLS 1.3 provides two basic handshake modes of interest to QWIK:
 
  * A full 1-RTT handshake in which the client is able to send application data
    after one round trip and the server immediately responds after receiving the
@@ -191,7 +191,7 @@ TLS 1.3 provides two basic handshake modes of interest to QUIC:
 
 A simplified TLS 1.3 handshake with 0-RTT application data is shown in
 {{tls-full}}.  Note that this omits the EndOfEarlyData message, which is not
-used in QUIC (see {{remove-eoed}}).
+used in QWIK (see {{remove-eoed}}).
 
 ~~~
     Client                                             Server
@@ -231,50 +231,50 @@ server.
 
 # Protocol Overview
 
-QUIC {{QUIC-TRANSPORT}} assumes responsibility for the confidentiality and
+QWIK {{QWIK-TRANSPORT}} assumes responsibility for the confidentiality and
 integrity protection of packets.  For this it uses keys derived from a TLS 1.3
-handshake {{!TLS13}}, but instead of carrying TLS records over QUIC (as with
-TCP), TLS Handshake and Alert messages are carried directly over the QUIC
+handshake {{!TLS13}}, but instead of carrying TLS records over QWIK (as with
+TCP), TLS Handshake and Alert messages are carried directly over the QWIK
 transport, which takes over the responsibilities of the TLS record layer, as
 shown below.
 
 ~~~~
 
 +--------------+--------------+ +-------------+
-|     TLS      |     TLS      | |    QUIC     |
+|     TLS      |     TLS      | |    QWIK     |
 |  Handshake   |    Alerts    | | Applications|
 |              |              | | (h2q, etc.) |
 +--------------+--------------+-+-------------+
 |                                             |
-|                QUIC Transport               |
+|                QWIK Transport               |
 |   (streams, reliability, congestion, etc.)  |
 |                                             |
 +---------------------------------------------+
 |                                             |
-|            QUIC Packet Protection           |
+|            QWIK Packet Protection           |
 |                                             |
 +---------------------------------------------+
 ~~~~
 
 
-QUIC also relies on TLS 1.3 for authentication and negotiation of parameters
+QWIK also relies on TLS 1.3 for authentication and negotiation of parameters
 that are critical to security and performance.
 
-Rather than a strict layering, these two protocols are co-dependent: QUIC uses
+Rather than a strict layering, these two protocols are co-dependent: QWIK uses
 the TLS handshake; TLS uses the reliability, ordered delivery, and record
-layer provided by QUIC.
+layer provided by QWIK.
 
-At a high level, there are two main interactions between the TLS and QUIC
+At a high level, there are two main interactions between the TLS and QWIK
 components:
 
-* The TLS component sends and receives messages via the QUIC component, with
-  QUIC providing a reliable stream abstraction to TLS.
+* The TLS component sends and receives messages via the QWIK component, with
+  QWIK providing a reliable stream abstraction to TLS.
 
-* The TLS component provides a series of updates to the QUIC component,
+* The TLS component provides a series of updates to the QWIK component,
   including (a) new packet protection keys to install (b) state changes such as
   handshake completion, the server certificate, etc.
 
-{{schematic}} shows these interactions in more detail, with the QUIC packet
+{{schematic}} shows these interactions in more detail, with the QWIK packet
 protection being called out specially.
 
 ~~~
@@ -282,37 +282,37 @@ protection being called out specially.
 |            |<- Handshake Messages ->|            |
 |            |<---- 0-RTT Keys -------|            |
 |            |<--- Handshake Keys-----|            |
-|   QUIC     |<---- 1-RTT Keys -------|    TLS     |
+|   QWIK     |<---- 1-RTT Keys -------|    TLS     |
 |            |<--- Handshake Done ----|            |
 +------------+                        +------------+
  |         ^
  | Protect | Protected
  v         | Packet
 +------------+
-|   QUIC     |
+|   QWIK     |
 |  Packet    |
 | Protection |
 +------------+
 ~~~
-{: #schematic title="QUIC and TLS Interactions"}
+{: #schematic title="QWIK and TLS Interactions"}
 
-Unlike TLS over TCP, QUIC applications which want to send data do not send it
-through TLS "application_data" records. Rather, they send it as QUIC STREAM
-frames which are then carried in QUIC packets.
+Unlike TLS over TCP, QWIK applications which want to send data do not send it
+through TLS "application_data" records. Rather, they send it as QWIK STREAM
+frames which are then carried in QWIK packets.
 
 # Carrying TLS Messages {#carrying-tls}
 
-QUIC carries TLS handshake data in CRYPTO frames, each of which consists of a
+QWIK carries TLS handshake data in CRYPTO frames, each of which consists of a
 contiguous block of handshake data identified by an offset and length. Those
-frames are packaged into QUIC packets and encrypted under the current TLS
+frames are packaged into QWIK packets and encrypted under the current TLS
 encryption level.  As with TLS over TCP, once TLS handshake data has been
-delivered to QUIC, it is QUIC's responsibility to deliver it reliably. Each
+delivered to QWIK, it is QWIK's responsibility to deliver it reliably. Each
 chunk of data that is produced by TLS is associated with the set of keys that
-TLS is currently using.  If QUIC needs to retransmit that data, it MUST use the
+TLS is currently using.  If QWIK needs to retransmit that data, it MUST use the
 same keys even if TLS has already updated to newer keys.
 
-One important difference between TLS 1.3 records (used with TCP) and QUIC CRYPTO
-frames is that in QUIC multiple frames may appear in the same QUIC packet as
+One important difference between TLS 1.3 records (used with TCP) and QWIK CRYPTO
+frames is that in QWIK multiple frames may appear in the same QWIK packet as
 long as they are associated with the same encryption level. For instance, an
 implementation might bundle a Handshake message and an ACK for some Handshake
 data into the same packet.
@@ -340,7 +340,7 @@ encryption levels:
 
 - All other frame types MUST only appear at the 1-RTT levels.
 
-Because packets could be reordered on the wire, QUIC uses the packet type to
+Because packets could be reordered on the wire, QWIK uses the packet type to
 indicate which level a given packet was encrypted under, as shown in
 {{packet-types-levels}}. When multiple packets of different encryption levels
 need to be sent, endpoints SHOULD use coalesced packets to send them in the same
@@ -355,13 +355,13 @@ UDP datagram.
 | Short Header    | 1-RTT            | 0/1-RTT   |
 {: #packet-types-levels title="Encryption Levels by Packet Type"}
 
-Section 6.5 of {{QUIC-TRANSPORT}} shows how packets at the various encryption
+Section 6.5 of {{QWIK-TRANSPORT}} shows how packets at the various encryption
 levels fit into the handshake process.
 
 
 ## Interface to TLS
 
-As shown in {{schematic}}, the interface from QUIC to TLS consists of three
+As shown in {{schematic}}, the interface from QWIK to TLS consists of three
 primary functions:
 
 - Sending and receiving handshake messages
@@ -375,13 +375,13 @@ Additional functions might be needed to configure TLS.
 
 In order to drive the handshake, TLS depends on being able to send and receive
 handshake messages. There are two basic functions on this interface: one where
-QUIC requests handshake messages and one where QUIC provides handshake packets.
+QWIK requests handshake messages and one where QWIK provides handshake packets.
 
-Before starting the handshake QUIC provides TLS with the transport parameters
-(see {{quic_parameters}}) that it wishes to carry.
+Before starting the handshake QWIK provides TLS with the transport parameters
+(see {{qwik_parameters}}) that it wishes to carry.
 
-A QUIC client starts TLS by requesting TLS handshake octets from TLS.  The
-client acquires handshake octets before sending its first packet.  A QUIC server
+A QWIK client starts TLS by requesting TLS handshake octets from TLS.  The
+client acquires handshake octets before sending its first packet.  A QWIK server
 starts the process by providing TLS with the client's handshake octets.
 
 At any given time, the TLS stack at an endpoint will have a current sending
@@ -391,12 +391,12 @@ peer in CRYPTO frames. When TLS provides handshake octets to be sent, they are
 appended to the current flow and any packet that includes the CRYPTO frame is
 protected using keys from the corresponding encryption level.
 
-QUIC takes the unprotected content of TLS handshake records as the content of
-CRYPTO frames. TLS record protection is not used by QUIC. QUIC assembles
-CRYPTO frames into QUIC packets, which are protected using QUIC packet
+QWIK takes the unprotected content of TLS handshake records as the content of
+CRYPTO frames. TLS record protection is not used by QWIK. QWIK assembles
+CRYPTO frames into QWIK packets, which are protected using QWIK packet
 protection.
 
-When an endpoint receives a QUIC packet containing a CRYPTO frame from the
+When an endpoint receives a QWIK packet containing a CRYPTO frame from the
 network, it proceeds as follows:
 
 - If the packet was in the TLS receiving encryption level, sequence the data
@@ -419,17 +419,17 @@ Each time that TLS is provided with new data, new handshake octets are requested
 from TLS.  TLS might not provide any octets if the handshake messages it has
 received are incomplete or it has no data to send.
 
-Once the TLS handshake is complete, this is indicated to QUIC along with any
-final handshake octets that TLS needs to send.  TLS also provides QUIC with the
+Once the TLS handshake is complete, this is indicated to QWIK along with any
+final handshake octets that TLS needs to send.  TLS also provides QWIK with the
 transport parameters that the peer advertised during the handshake.
 
 Once the handshake is complete, TLS becomes passive.  TLS can still receive data
 from its peer and respond in kind, but it will not need to send more data unless
-specifically requested - either by an application or QUIC.  One reason to send
+specifically requested - either by an application or QWIK.  One reason to send
 data is that the server might wish to provide additional or updated session
 tickets to a client.
 
-When the handshake is complete, QUIC only needs to provide TLS with any data
+When the handshake is complete, QWIK only needs to provide TLS with any data
 that arrives in CRYPTO streams.  In the same way that is done during the
 handshake, new data is requested from TLS after providing received data.
 
@@ -450,25 +450,25 @@ Important:
 
 ### Encryption Level Changes
 
-As keys for new encryption levels become available, TLS provides QUIC with those
+As keys for new encryption levels become available, TLS provides QWIK with those
 keys.  Separately, as TLS starts using keys at a given encryption level, TLS
-indicates to QUIC that it is now reading or writing with keys at that encryption
+indicates to QWIK that it is now reading or writing with keys at that encryption
 level.  These events are not asynchronous; they always occur immediately after
 TLS is provided with new handshake octets, or after TLS produces handshake
 octets.
 
 If 0-RTT is possible, it is ready after the client sends a TLS ClientHello
-message or the server receives that message.  After providing a QUIC client with
+message or the server receives that message.  After providing a QWIK client with
 the first handshake octets, the TLS stack might signal the change to 0-RTT
 keys. On the server, after receiving handshake octets that contain a ClientHello
 message, a TLS server might signal that 0-RTT keys are available.
 
-Although TLS only uses one encryption level at a time, QUIC may use more than
+Although TLS only uses one encryption level at a time, QWIK may use more than
 one level. For instance, after sending its Finished message (using a CRYPTO
 frame at the Handshake encryption level) an endpoint can send STREAM data (in
 1-RTT encryption). If the Finished message is lost, the endpoint uses the
 Handshake encryption level to retransmit the lost message.  Reordering or loss
-of packets can mean that QUIC will need to handle packets at multiple encryption
+of packets can mean that QWIK will need to handle packets at multiple encryption
 levels.  During the handshake, this means potentially handling packets at higher
 and lower encryption levels than the current encryption level used by TLS.
 
@@ -481,7 +481,7 @@ detect lost Handshake packets.
 
 ### TLS Interface Summary
 
-{{exchange-summary}} summarizes the exchange between QUIC and TLS for both
+{{exchange-summary}} summarizes the exchange between QWIK and TLS for both
 client and server. Each arrow is tagged with the encryption level used for that
 transmission.
 
@@ -517,17 +517,17 @@ Rekey tx to 1-RTT keys
                      <--------------- 1-RTT
 Handshake Received
 ~~~
-{: #exchange-summary title="Interaction Summary between QUIC and TLS"}
+{: #exchange-summary title="Interaction Summary between QWIK and TLS"}
 
 
 ## TLS Version
 
-This document describes how TLS 1.3 {{!TLS13}} is used with QUIC.
+This document describes how TLS 1.3 {{!TLS13}} is used with QWIK.
 
 In practice, the TLS handshake will negotiate a version of TLS to use.  This
 could result in a newer version of TLS than 1.3 being negotiated if both
 endpoints support that version.  This is acceptable provided that the features
-of TLS 1.3 that are used by QUIC are supported by the newer version.
+of TLS 1.3 that are used by QWIK are supported by the newer version.
 
 A badly configured TLS implementation could negotiate TLS 1.2 or another older
 version of TLS.  An endpoint MUST terminate the connection if a version of TLS
@@ -536,22 +536,22 @@ older than 1.3 is negotiated.
 
 ## ClientHello Size {#clienthello-size}
 
-QUIC requires that the first Initial packet from a client contain an entire
+QWIK requires that the first Initial packet from a client contain an entire
 cryptographic handshake message, which for TLS is the ClientHello.  Though a
 packet larger than 1200 octets might be supported by the path, a client improves
 the likelihood that a packet is accepted if it ensures that the first
 ClientHello message is small enough to stay within this limit.
 
-QUIC packet and framing add at least 36 octets of overhead to the ClientHello
+QWIK packet and framing add at least 36 octets of overhead to the ClientHello
 message.  That overhead increases if the client chooses a connection ID without
 zero length.  Overheads also do not include the token or a connection ID longer
 than 8 octets, both of which might be required if a server sends a Retry packet.
 
 A typical TLS ClientHello can easily fit into a 1200 octet packet.  However, in
-addition to the overheads added by QUIC, there are several variables that could
+addition to the overheads added by QWIK, there are several variables that could
 cause this limit to be exceeded.  Large session tickets, multiple or large key
 shares, and long lists of supported ciphers, signature algorithms, versions,
-QUIC transport parameters, and other negotiable parameters and extensions could
+QWIK transport parameters, and other negotiable parameters and extensions could
 cause this message to grow.
 
 For servers, in addition to connection IDs and tokens, the size of TLS session
@@ -563,7 +563,7 @@ A client is not required to fit the ClientHello that it sends in response to a
 HelloRetryRequest message into a single UDP datagram.
 
 The TLS implementation does not need to ensure that the ClientHello is
-sufficiently large.  QUIC PADDING frames are added to increase the size of the
+sufficiently large.  QWIK PADDING frames are added to increase the size of the
 packet as necessary.
 
 
@@ -604,7 +604,7 @@ as a connection error of type PROTOCOL_VIOLATION.
 ## Rejecting 0-RTT
 
 A server rejects 0-RTT by rejecting 0-RTT at the TLS layer.  This also prevents
-QUIC from sending 0-RTT data. A server will always reject 0-RTT if it sends a
+QWIK from sending 0-RTT data. A server will always reject 0-RTT if it sends a
 TLS HelloRetryRequest.
 
 When 0-RTT is rejected, all connection characteristics that the client assumed
@@ -620,11 +620,11 @@ Negotiation packet.  These packets do not signify rejection of 0-RTT.
 
 In TLS over TCP, the HelloRetryRequest feature (see Section 4.1.4 of {{!TLS13}})
 can be used to correct a client's incorrect KeyShare extension as well as for a
-stateless round-trip check. From the perspective of QUIC, this just looks like
+stateless round-trip check. From the perspective of QWIK, this just looks like
 additional messages carried in the Initial encryption level. Although it is in
-principle possible to use this feature for address verification in QUIC, QUIC
+principle possible to use this feature for address verification in QWIK, QWIK
 implementations SHOULD instead use the Retry feature (see Section 4.4 of
-{{QUIC-TRANSPORT}}).  HelloRetryRequest is still used to request key shares.
+{{QWIK-TRANSPORT}}).  HelloRetryRequest is still used to request key shares.
 
 
 ## TLS Errors
@@ -632,10 +632,10 @@ implementations SHOULD instead use the Retry feature (see Section 4.4 of
 If TLS experiences an error, it generates an appropriate alert as defined in
 Section 6 of {{!TLS13}}.
 
-A TLS alert is turned into a QUIC connection error by converting the one-octet
-alert description into a QUIC error code.  The alert description is added to
-0x100 to produce a QUIC error code from the range reserved for CRYPTO_ERROR.
-The resulting value is sent in a QUIC CONNECTION_CLOSE frame.
+A TLS alert is turned into a QWIK connection error by converting the one-octet
+alert description into a QWIK error code.  The alert description is added to
+0x100 to produce a QWIK error code from the range reserved for CRYPTO_ERROR.
+The resulting value is sent in a QWIK CONNECTION_CLOSE frame.
 
 The alert level of all TLS alerts is "fatal"; a TLS stack MUST NOT generate
 alerts at the "warning" level.
@@ -643,7 +643,7 @@ alerts at the "warning" level.
 
 ## Discarding Unused Keys
 
-After QUIC moves to a new encryption level, packet protection keys for previous
+After QWIK moves to a new encryption level, packet protection keys for previous
 encryption levels can be discarded.  This occurs several times during the
 handshake, as well as when keys are updated (see {{key-update}}).
 
@@ -669,7 +669,7 @@ carry CRYPTO frames, this timer starts when the first packets protected with
 1-RTT are sent or received.  To limit the effect of packet loss around a change
 in keys, endpoints MUST retain packet protection keys for that encryption level
 for at least three times the current Retransmission Timeout (RTO) interval as
-defined in {{QUIC-RECOVERY}}.  Retaining keys for this interval allows packets
+defined in {{QWIK-RECOVERY}}.  Retaining keys for this interval allows packets
 containing CRYPTO or ACK frames at that encryption level to be sent if packets
 are determined to be lost or new packets require acknowledgment.
 
@@ -697,31 +697,31 @@ packet numbers.
 
 # Packet Protection {#packet-protection}
 
-As with TLS over TCP, QUIC protects packets with keys derived from the TLS
+As with TLS over TCP, QWIK protects packets with keys derived from the TLS
 handshake, using the AEAD algorithm negotiated by TLS.
 
 
 ## Packet Protection Keys {#protection-keys}
 
-QUIC derives packet protection keys in the same way that TLS derives record
+QWIK derives packet protection keys in the same way that TLS derives record
 protection keys.
 
 Each encryption level has separate secret values for protection of packets sent
 in each direction.  These traffic secrets are derived by TLS (see Section 7.1 of
-{{!TLS13}}) and are used by QUIC for all encryption levels except the Initial
+{{!TLS13}}) and are used by QWIK for all encryption levels except the Initial
 encryption level.  The secrets for the Initial encryption level are computed
 based on the client's initial Destination Connection ID, as described in
 {{initial-secrets}}.
 
 The keys used for packet protection are computed from the TLS secrets using the
 method described in Section 7.3 of {{!TLS13}}), except that the label for
-HKDF-Expand-Label uses the prefix "quic " rather than "tls13 ". A different
-label provides key separation between TLS and QUIC.
+HKDF-Expand-Label uses the prefix "qwik " rather than "tls13 ". A different
+label provides key separation between TLS and QWIK.
 
 For example, where TLS might use a label of 0x002009746c733133206b657900 to
-derive a key, QUIC uses 0x00200871756963206b657900.
+derive a key, QWIK uses 0x00200871756963206b657900.
 
-The HKDF-Expand-Label function with a "quic " label is also used to derive the
+The HKDF-Expand-Label function with a "qwik " label is also used to derive the
 initial secrets (see {{initial-secrets}}) and to derive a packet number
 protection key (the "pn" label, see {{pn-encrypt}}).
 
@@ -754,9 +754,9 @@ value unless the client creates the Initial packet after receiving a Retry
 packet, where the Destination Connection ID is selected by the server.
 
 The value of initial_salt is a 20 octet sequence shown in the figure in
-hexadecimal notation. Future versions of QUIC SHOULD generate a new salt value,
-thus ensuring that the keys are different for each version of QUIC. This
-prevents a middlebox that only recognizes one version of QUIC from seeing or
+hexadecimal notation. Future versions of QWIK SHOULD generate a new salt value,
+thus ensuring that the keys are different for each version of QWIK. This
+prevents a middlebox that only recognizes one version of QWIK from seeing or
 modifying the contents of handshake packets from future versions.
 
 Note:
@@ -771,38 +771,38 @@ Note:
 ## AEAD Usage {#aead}
 
 The Authentication Encryption with Associated Data (AEAD) {{!AEAD}} function
-used for QUIC packet protection is the AEAD that is negotiated for use with the
+used for QWIK packet protection is the AEAD that is negotiated for use with the
 TLS connection.  For example, if TLS is using the TLS_AES_128_GCM_SHA256, the
 AEAD_AES_128_GCM function is used.
 
-QUIC packets are protected prior to applying packet number protection
+QWIK packets are protected prior to applying packet number protection
 ({{pn-encrypt}}).  The unprotected packet number is part of the associated data
 (A).  When removing packet protection, an endpoint first removes the protection
 from the packet number.
 
-All QUIC packets other than Version Negotiation and Retry packets are protected
+All QWIK packets other than Version Negotiation and Retry packets are protected
 with an AEAD algorithm {{!AEAD}}. Prior to establishing a shared secret, packets
 are protected with AEAD_AES_128_GCM and a key derived from the destination
 connection ID in the client's first Initial packet (see {{initial-secrets}}).
-This provides protection against off-path attackers and robustness against QUIC
+This provides protection against off-path attackers and robustness against QWIK
 version unaware middleboxes, but not against on-path attackers.
 
-All ciphersuites currently defined for TLS 1.3 - and therefore QUIC - have a
+All ciphersuites currently defined for TLS 1.3 - and therefore QWIK - have a
 16-byte authentication tag and produce an output 16 bytes larger than their
 input.
 
 The key and IV for the packet are computed as described in {{protection-keys}}.
 The nonce, N, is formed by combining the packet protection IV with the packet
-number.  The 64 bits of the reconstructed QUIC packet number in network byte
+number.  The 64 bits of the reconstructed QWIK packet number in network byte
 order are left-padded with zeros to the size of the IV.  The exclusive OR of the
 padded packet number and the IV forms the AEAD nonce.
 
-The associated data, A, for the AEAD is the contents of the QUIC header,
+The associated data, A, for the AEAD is the contents of the QWIK header,
 starting from the flags octet in either the short or long header, up to and
 including the unprotected packet number.
 
-The input plaintext, P, for the AEAD is the content of the QUIC frame following
-the header, as described in {{QUIC-TRANSPORT}}.
+The input plaintext, P, for the AEAD is the content of the QWIK frame following
+the header, as described in {{QWIK-TRANSPORT}}.
 
 The output ciphertext, C, of the AEAD is transmitted in place of P.
 
@@ -814,7 +814,7 @@ prior to exceeding any limit set for the AEAD that is in use.
 
 ## Packet Number Protection {#pn-encrypt}
 
-QUIC packet numbers are protected using a key that is derived from the current
+QWIK packet numbers are protected using a key that is derived from the current
 set of secrets.  The key derived using the "pn" label is used to protect the
 packet number from casual observation.  The packet number protection algorithm
 depends on the negotiated AEAD.
@@ -842,7 +842,7 @@ sample = packet[sample_offset..sample_offset+sample_length]
 ~~~
 
 A packet with a long header is sampled in the same way, noting that multiple
-QUIC packets might be included in the same UDP datagram and that each one is
+QWIK packets might be included in the same UDP datagram and that each one is
 handled separately.
 
 ~~~
@@ -859,11 +859,11 @@ protection algorithms MUST NOT sample more ciphertext than the minimum expansion
 of the corresponding AEAD.
 
 Packet number protection is applied to the packet number encoded as described in
-Section 4.11 of {{QUIC-TRANSPORT}}. Since the length of the packet number is
+Section 4.11 of {{QWIK-TRANSPORT}}. Since the length of the packet number is
 stored in the first octet of the encoded packet number, it may be necessary to
 progressively decrypt the packet number.
 
-Before a TLS ciphersuite can be used with QUIC, a packet protection algorithm
+Before a TLS ciphersuite can be used with QWIK, a packet protection algorithm
 MUST be specifed for the AEAD used with that ciphersuite.  This document defines
 algorithms for AEAD_AES_128_GCM, AEAD_AES_128_CCM, AEAD_AES_256_GCM,
 AEAD_AES_256_CCM (all AES AEADs are defined in {{!AEAD=RFC5116}}), and
@@ -918,7 +918,7 @@ cannot be unprotected successfully MUST be discarded.
 
 Failure to unprotect a packet does not necessarily indicate the existence of a
 protocol error in a peer or an attack.  The truncated packet number encoding
-used in QUIC can cause packet numbers to be decoded incorrectly if they are
+used in QWIK can cause packet numbers to be decoded incorrectly if they are
 delayed significantly.
 
 
@@ -1019,13 +1019,13 @@ key updates in a short time frame succession and significant packet reordering.
 ~~~
    Initiating Peer                    Responding Peer
 
-@M QUIC Frames
+@M QWIK Frames
                New Keys -> @N
-@N QUIC Frames
+@N QWIK Frames
                       -------->
-                                          QUIC Frames @M
+                                          QWIK Frames @M
                           New Keys -> @N
-                                          QUIC Frames @N
+                                          QWIK Frames @N
                       <--------
 ~~~
 {: #ex-key-update title="Key Update"}
@@ -1040,7 +1040,7 @@ MUST immediately terminate the connection if it detects this condition.
 # Security of Initial Messages
 
 Initial packets are not protected with a secret key, so they are subject to
-potential tampering by an attacker.  QUIC provides protection against attackers
+potential tampering by an attacker.  QWIK provides protection against attackers
 that cannot read packets, but does not attempt to provide additional protection
 against attacks where the attacker can observe and inject packets.  Some forms
 of tampering -- such as modifying the TLS messages themselves -- are detectable,
@@ -1058,57 +1058,57 @@ Handshake packets, but because that tampering requires modifying TLS handshake
 messages, that tampering will cause the TLS handshake to fail.
 
 
-# QUIC-Specific Additions to the TLS Handshake
+# QWIK-Specific Additions to the TLS Handshake
 
-QUIC uses the TLS handshake for more than just negotiation of cryptographic
+QWIK uses the TLS handshake for more than just negotiation of cryptographic
 parameters.  The TLS handshake validates protocol version selection, provides
-preliminary values for QUIC transport parameters, and allows a server to perform
+preliminary values for QWIK transport parameters, and allows a server to perform
 return routeability checks on clients.
 
 
 ## Protocol and Version Negotiation {#version-negotiation}
 
-The QUIC version negotiation mechanism is used to negotiate the version of QUIC
+The QWIK version negotiation mechanism is used to negotiate the version of QWIK
 that is used prior to the completion of the handshake.  However, this packet is
 not authenticated, enabling an active attacker to force a version downgrade.
 
-To ensure that a QUIC version downgrade is not forced by an attacker, version
+To ensure that a QWIK version downgrade is not forced by an attacker, version
 information is copied into the TLS handshake, which provides integrity
-protection for the QUIC negotiation.  This does not prevent version downgrade
+protection for the QWIK negotiation.  This does not prevent version downgrade
 prior to the completion of the handshake, though it means that a downgrade
 causes a handshake failure.
 
 TLS uses Application Layer Protocol Negotiation (ALPN) {{!RFC7301}} to select an
-application protocol.  The application-layer protocol MAY restrict the QUIC
+application protocol.  The application-layer protocol MAY restrict the QWIK
 versions that it can operate over.  Servers MUST select an application protocol
-compatible with the QUIC version that the client has selected.
+compatible with the QWIK version that the client has selected.
 
 If the server cannot select a compatible combination of application protocol and
-QUIC version, it MUST abort the connection. A client MUST abort a connection if
-the server picks an incompatible combination of QUIC version and ALPN
+QWIK version, it MUST abort the connection. A client MUST abort a connection if
+the server picks an incompatible combination of QWIK version and ALPN
 identifier.
 
 
-## QUIC Transport Parameters Extension {#quic_parameters}
+## QWIK Transport Parameters Extension {#qwik_parameters}
 
-QUIC transport parameters are carried in a TLS extension. Different versions of
-QUIC might define a different format for this struct.
+QWIK transport parameters are carried in a TLS extension. Different versions of
+QWIK might define a different format for this struct.
 
 Including transport parameters in the TLS handshake provides integrity
 protection for these values.
 
 ~~~
    enum {
-      quic_transport_parameters(0xffa5), (65535)
+      qwik_transport_parameters(0xffa5), (65535)
    } ExtensionType;
 ~~~
 
-The `extension_data` field of the quic_transport_parameters extension contains a
-value that is defined by the version of QUIC that is in use.  The
-quic_transport_parameters extension carries a TransportParameters when the
-version of QUIC defined in {{QUIC-TRANSPORT}} is used.
+The `extension_data` field of the qwik_transport_parameters extension contains a
+value that is defined by the version of QWIK that is in use.  The
+qwik_transport_parameters extension carries a TransportParameters when the
+version of QWIK defined in {{QWIK-TRANSPORT}} is used.
 
-The quic_transport_parameters extension is carried in the ClientHello and the
+The qwik_transport_parameters extension is carried in the ClientHello and the
 EncryptedExtensions messages during the handshake.
 
 While the transport parameters are technically available prior to the completion
@@ -1117,14 +1117,14 @@ and reliance on them should be minimized.  However, any tampering with the
 parameters will cause the handshake to fail.
 
 Endpoints MUST NOT send this extension in a TLS connection that does not use
-QUIC (such as the use of TLS with TCP defined in {{!TLS13}}).  A fatal
+QWIK (such as the use of TLS with TCP defined in {{!TLS13}}).  A fatal
 unsupported_extension alert MUST be sent if this extension is received when the
-transport is not QUIC.
+transport is not QWIK.
 
 
 ## Removing the EndOfEarlyData Message {#remove-eoed}
 
-The TLS EndOfEarlyData message is not used with QUIC.  QUIC does not rely on
+The TLS EndOfEarlyData message is not used with QWIK.  QWIK does not rely on
 this message to mark the end of 0-RTT data or to signal the change to Handshake
 keys.
 
@@ -1150,10 +1150,10 @@ A small ClientHello that results in a large block of handshake messages from a
 server can be used in packet reflection attacks to amplify the traffic generated
 by an attacker.
 
-QUIC includes three defenses against this attack. First, the packet containing a
+QWIK includes three defenses against this attack. First, the packet containing a
 ClientHello MUST be padded to a minimum size. Second, if responding to an
 unverified source address, the server is forbidden to send more than three UDP
-datagrams in its first flight (see Section 4.7 of {{QUIC-TRANSPORT}}). Finally,
+datagrams in its first flight (see Section 4.7 of {{QWIK-TRANSPORT}}). Finally,
 because acknowledgements of Handshake packets are authenticated, a blind
 attacker cannot forge them.  Put together, these defenses limit the level of
 amplification.
@@ -1161,14 +1161,14 @@ amplification.
 
 ## Peer Denial of Service {#useless}
 
-QUIC, TLS, and HTTP/2 all contain messages that have legitimate uses in some
+QWIK, TLS, and HTTP/2 all contain messages that have legitimate uses in some
 contexts, but that can be abused to cause a peer to expend processing resources
 without having any observable impact on the state of the connection.  If
 processing is disproportionately large in comparison to the observable effects
 on bandwidth or state, then this could allow a malicious peer to exhaust
 processing capacity without consequence.
 
-QUIC prohibits the sending of empty `STREAM` frames unless they are marked with
+QWIK prohibits the sending of empty `STREAM` frames unless they are marked with
 the FIN bit.  This prevents `STREAM` frames from being sent that only waste
 effort.
 
@@ -1233,7 +1233,7 @@ values in the following registries:
 
 * TLS ExtensionsType Registry
   {{!TLS-REGISTRIES=I-D.ietf-tls-iana-registry-updates}} - IANA is to register
-  the quic_transport_parameters extension found in {{quic_parameters}}.
+  the qwik_transport_parameters extension found in {{qwik_parameters}}.
   The Recommended column is to be marked Yes.  The TLS 1.3 Column
   is to include CH and EE.
 
@@ -1258,8 +1258,8 @@ Issue and pull request numbers are listed with a leading octothorp.
 - Changes to integration of the TLS handshake (#829, #1018, #1094, #1165, #1190,
   #1233, #1242, #1252, #1450)
   - The cryptographic handshake uses CRYPTO frames, not stream 0
-  - QUIC packet protection is used in place of TLS record protection
-  - Separate QUIC packet number spaces are used for the handshake
+  - QWIK packet protection is used in place of TLS record protection
+  - Separate QWIK packet number spaces are used for the handshake
   - Changed Retry to be independent of the cryptographic handshake
   - Limit the use of HelloRetryRequest to address TLS needs (like key shares)
 - Changed codepoint of TLS extension (#1395, #1402)
@@ -1317,13 +1317,13 @@ No significant changes.
 - Use TLS alerts to signal TLS errors (#272, #374)
 - Require ClientHello to fit in a single packet (#338)
 - The second client handshake flight is now sent in the clear (#262, #337)
-- The QUIC header is included as AEAD Associated Data (#226, #243, #302)
+- The QWIK header is included as AEAD Associated Data (#226, #243, #302)
 - Add interface necessary for client address validation (#275)
 - Define peer authentication (#140)
 - Require at least TLS 1.3 (#138)
 - Define transport parameters as a TLS extension (#122)
 - Define handling for protected packets before the handshake completes (#39)
-- Decouple QUIC version and ALPN (#12)
+- Decouple QWIK version and ALPN (#12)
 
 
 ## Since draft-ietf-quic-tls-00

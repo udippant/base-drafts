@@ -1,12 +1,12 @@
 ---
-title: "QUIC: A UDP-Based Multiplexed and Secure Transport"
-abbrev: QUIC Transport Protocol
+title: "QWIK: A UDP-Based Multiplexed and Secure Transport"
+abbrev: QWIK Transport Protocol
 docname: draft-ietf-quic-transport-latest
 date: {DATE}
 category: std
 ipr: trust200902
 area: Transport
-workgroup: QUIC
+workgroup: QWIK
 
 stand_alone: yes
 pi: [toc, sortrefs, symrefs, docmapping]
@@ -27,8 +27,8 @@ author:
 
 normative:
 
-  QUIC-RECOVERY:
-    title: "QUIC Loss Detection and Congestion Control"
+  QWIK-RECOVERY:
+    title: "QWIK Loss Detection and Congestion Control"
     date: {DATE}
     seriesinfo:
       Internet-Draft: draft-ietf-quic-recovery-latest
@@ -44,8 +44,8 @@ normative:
         org: Google
         role: editor
 
-  QUIC-TLS:
-    title: "Using Transport Layer Security (TLS) to Secure QUIC"
+  QWIK-TLS:
+    title: "Using Transport Layer Security (TLS) to Secure QWIK"
     date: {DATE}
     seriesinfo:
       Internet-Draft: draft-ietf-quic-tls-latest
@@ -63,8 +63,8 @@ normative:
 
 informative:
 
-  QUIC-INVARIANTS:
-    title: "Version-Independent Properties of QUIC"
+  QWIK-INVARIANTS:
+    title: "Version-Independent Properties of QWIK"
     date: {DATE}
     seriesinfo:
       Internet-Draft: draft-ietf-quic-invariants-latest
@@ -75,7 +75,7 @@ informative:
         org: Mozilla
 
   EARLY-DESIGN:
-    title: "QUIC: Multiplexed Transport Over UDP"
+    title: "QWIK: Multiplexed Transport Over UDP"
     author:
       - ins: J. Roskind
     date: 2013-12-02
@@ -92,7 +92,7 @@ informative:
 
 --- abstract
 
-This document defines the core of the QUIC transport protocol.  This document
+This document defines the core of the QWIK transport protocol.  This document
 describes connection establishment, packet format, multiplexing, and
 reliability.  Accompanying documents describe the cryptographic handshake and
 loss detection.
@@ -100,7 +100,7 @@ loss detection.
 
 --- note_Note_to_Readers
 
-Discussion of this draft takes place on the QUIC working group mailing list
+Discussion of this draft takes place on the QWIK working group mailing list
 (quic@ietf.org), which is archived at
 \<https://mailarchive.ietf.org/arch/search/?email_list=quic\>.
 
@@ -112,8 +112,8 @@ code and issues list for this draft can be found at
 
 # Introduction
 
-QUIC is a multiplexed and secure transport protocol that runs on top of UDP.
-QUIC aims to provide a flexible set of features that allow it to be a
+QWIK is a multiplexed and secure transport protocol that runs on top of UDP.
+QWIK aims to provide a flexible set of features that allow it to be a
 general-purpose secure transport for multiple applications.
 
 * Version negotiation
@@ -128,22 +128,22 @@ general-purpose secure transport for multiple applications.
 
 * Connection migration and resilience to NAT rebinding
 
-QUIC uses UDP as a substrate to avoid requiring changes in legacy client
-operating systems and middleboxes.  QUIC authenticates all of its headers and
+QWIK uses UDP as a substrate to avoid requiring changes in legacy client
+operating systems and middleboxes.  QWIK authenticates all of its headers and
 encrypts most of the data it exchanges, including its signaling.  This allows
 the protocol to evolve without incurring a dependency on upgrades to
 middleboxes.
 
 ## Document Structure
 
-This document describes the core QUIC protocol, and is structured as follows:
+This document describes the core QWIK protocol, and is structured as follows:
 
-* Streams are the basic service abstraction that QUIC provides.
+* Streams are the basic service abstraction that QWIK provides.
   - {{streams}} describes core concepts related to streams,
   - {{stream-states}} provides a reference model for stream states, and
   - {{flow-control}} outlines the operation of flow control.
 
-* Connections are the context in which QUIC endpoints communicate.
+* Connections are the context in which QWIK endpoints communicate.
   - {{connections}} describes core concepts related to connections,
   - {{version-negotiation}} describes version negotiation,
   - {{handshake}} details the process for establishing connections,
@@ -151,23 +151,23 @@ This document describes the core QUIC protocol, and is structured as follows:
     network paths, and
   - {{termination}} lists the options for terminating an open connection.
 
-* Packets and frames are the basic unit used by QUIC to communicate.
+* Packets and frames are the basic unit used by QWIK to communicate.
   - {{packets-frames}} describes concepts related to packets and frames,
   - {{packetization}} defines models for the transmission, retransmission, and
     acknowledgement of information, and
   - {{packet-size}} contains a rules for managing the size of packets.
 
-* Details of encoding of QUIC protocol elements is described in:
+* Details of encoding of QWIK protocol elements is described in:
   - {{versions}} (Versions),
   - {{packet-formats}} (Packet Headers),
   - {{transport-parameter-encoding}} (Transport Parameters),
   - {{frame-formats}} (Frames), and
   - {{error-codes}} (Errors).
 
-Accompanying documents describe QUIC's loss detection and congestion control
-{{QUIC-RECOVERY}}, and the use of TLS 1.3 for key negotiation {{QUIC-TLS}}.
+Accompanying documents describe QWIK's loss detection and congestion control
+{{QWIK-RECOVERY}}, and the use of TLS 1.3 for key negotiation {{QWIK-TLS}}.
 
-QUIC version 1 conforms to the protocol invariants in {{QUIC-INVARIANTS}}.
+QWIK version 1 conforms to the protocol invariants in {{QWIK-INVARIANTS}}.
 
 
 ## Conventions and Definitions
@@ -181,11 +181,11 @@ Definitions of terms that are used in this document:
 
 Client:
 
-: The endpoint initiating a QUIC connection.
+: The endpoint initiating a QWIK connection.
 
 Server:
 
-: The endpoint accepting incoming QUIC connections.
+: The endpoint accepting incoming QWIK connections.
 
 Endpoint:
 
@@ -194,23 +194,23 @@ Endpoint:
 Stream:
 
 : A logical unidirectional or bidirectional channel of ordered bytes within a
-  QUIC connection.
+  QWIK connection.
 
 Connection:
 
-: A conversation between two QUIC endpoints with a single encryption context
+: A conversation between two QWIK endpoints with a single encryption context
   that multiplexes streams within it.
 
 Connection ID:
 
-: An opaque identifier that is used to identify a QUIC connection at an
+: An opaque identifier that is used to identify a QWIK connection at an
   endpoint.  Each endpoint sets a value that its peer includes in packets.
 
-QUIC packet:
+QWIK packet:
 
-: The smallest unit of data that can be exchanged by QUIC endpoints.
+: The smallest unit of data that can be exchanged by QWIK endpoints.
 
-QUIC is a name, not an acronym.
+QWIK is a name, not an acronym.
 
 
 ## Notational Conventions
@@ -236,9 +236,9 @@ x (*) ...
 
 # Streams {#streams}
 
-Streams in QUIC provide a lightweight, ordered byte-stream abstraction.
+Streams in QWIK provide a lightweight, ordered byte-stream abstraction.
 
-There are two basic types of stream in QUIC.  Unidirectional streams carry data
+There are two basic types of stream in QWIK.  Unidirectional streams carry data
 in one direction: from the initiator of the stream to its peer;
 bidirectional streams allow for data to be sent in both directions.  Different
 stream identifiers are used to distinguish between unidirectional and
@@ -264,7 +264,7 @@ commitment and to apply back pressure.  The creation of streams is also flow
 controlled, with each peer declaring the maximum stream ID it is willing to
 accept at a given time.
 
-An alternative view of QUIC streams is as an elastic "message" abstraction,
+An alternative view of QWIK streams is as an elastic "message" abstraction,
 similar to the way ephemeral streams are used in SST
 {{?SST=DOI.10.1145/1282427.1282421}}, which may be a more appealing description
 for some applications.
@@ -306,14 +306,14 @@ The two type bits from a Stream ID therefore identify streams as summarized in
 
 The first bidirectional stream opened by the client is stream 0.
 
-A QUIC endpoint MUST NOT reuse a Stream ID.  Streams of each type are created in
+A QWIK endpoint MUST NOT reuse a Stream ID.  Streams of each type are created in
 numeric order.  Streams that are used out of order result in opening all
 lower-numbered streams of the same type in the same direction.
 
 
 ## Stream Concurrency {#stream-concurrency}
 
-QUIC allows for an arbitrary number of streams to operate concurrently.  An
+QWIK allows for an arbitrary number of streams to operate concurrently.  An
 endpoint limits the number of concurrently active incoming streams by limiting
 the maximum stream ID (see {{stream-limit-increment}}).
 
@@ -341,7 +341,7 @@ which encapsulate data for a stream. STREAM frames carry a flag that can be used
 to signal the end of a stream.
 
 Streams are an ordered byte-stream abstraction with no other structure that is
-visible to QUIC. STREAM frame boundaries are not expected to preserved when data
+visible to QWIK. STREAM frame boundaries are not expected to preserved when data
 is transmitted, when data is retransmitted after packet loss, or when data is
 delivered to the application at the receiver.
 
@@ -351,7 +351,7 @@ data.  The first octet of data on a stream has an offset of 0.  An endpoint is
 expected to send every stream octet.  The largest offset delivered on a stream
 MUST be less than 2^62.
 
-QUIC makes no specific allowances for partial reliability or delivery of stream
+QWIK makes no specific allowances for partial reliability or delivery of stream
 data out of order.  Endpoints MUST be able to deliver stream data to an
 application as an ordered byte-stream.  Delivering an ordered byte-stream
 requires that an endpoint buffer any data that is received out of order, up to
@@ -374,17 +374,17 @@ resources allocated to streams are correctly prioritized.  Experience with other
 multiplexed protocols, such as HTTP/2 {{?HTTP2}}, shows that effective
 prioritization strategies have a significant positive impact on performance.
 
-QUIC does not provide frames for exchanging prioritization information.  Instead
-it relies on receiving priority information from the application that uses QUIC.
-Protocols that use QUIC are able to define any prioritization scheme that suits
+QWIK does not provide frames for exchanging prioritization information.  Instead
+it relies on receiving priority information from the application that uses QWIK.
+Protocols that use QWIK are able to define any prioritization scheme that suits
 their application semantics.  A protocol might define explicit messages for
 signaling priority, such as those defined in HTTP/2; it could define rules that
 allow an endpoint to determine priority based on context; or it could leave the
 determination to the application.
 
-A QUIC implementation SHOULD provide ways in which an application can indicate
+A QWIK implementation SHOULD provide ways in which an application can indicate
 the relative priority of streams.  When deciding which streams to dedicate
-resources to, QUIC SHOULD use the information provided by the application.
+resources to, QWIK SHOULD use the information provided by the application.
 Failure to account for priority of streams can result in suboptimal performance.
 
 Stream priority is most relevant when deciding which stream data will be
@@ -409,7 +409,7 @@ consume already received data and free up the flow control window.
 
 # Stream States: Life of a Stream {#stream-states}
 
-This section describes the two types of QUIC stream in terms of the states of
+This section describes the two types of QWIK stream in terms of the states of
 their send or receive components.  Two state machines are described: one for
 streams on which an endpoint transmits data ({{stream-send-states}}); another
 for streams from which an endpoint receives data ({{stream-recv-states}}).
@@ -429,7 +429,7 @@ Note:
 : These states are largely informative.  This document uses stream states to
   describe rules for when and how different types of frames can be sent and the
   reactions that are expected when different types of frames are received.
-  Though these state machines are intended to be useful in implementing QUIC,
+  Though these state machines are intended to be useful in implementing QWIK,
   these states aren't intended to constrain implementations.  An implementation
   can define a different state machine as long as its behavior is consistent
   with an implementation that implements these states.
@@ -725,10 +725,10 @@ STOP_SENDING frame is unnecessary.
 It is necessary to limit the amount of data that a sender may have outstanding
 at any time, so as to prevent a fast sender from overwhelming a slow receiver,
 or to prevent a malicious sender from consuming significant resources at a
-receiver.  To this end, QUIC employs a credit-based flow-control scheme similar
+receiver.  To this end, QWIK employs a credit-based flow-control scheme similar
 to that in HTTP/2 {{?HTTP2}}.  A receiver advertises the number of octets it is
 prepared to receive on a given stream and for the entire connection.  This leads
-to two levels of flow control in QUIC:
+to two levels of flow control in QWIK:
 
 * Stream flow control, which prevents a single stream from consuming the entire
   receive buffer for a connection.
@@ -871,9 +871,9 @@ state for closed streams, which could mean a significant state commitment.
 ## Flow Control for Cryptographic Handshake {#flow-control-crypto}
 
 Data sent in CRYPTO frames is not flow controlled in the same way as STREAM
-frames.  QUIC relies on the cryptographic protocol implementation to avoid
-excessive buffering of data, see {{QUIC-TLS}}.  The implementation SHOULD
-provide an interface to QUIC to tell it about its buffering limits so that there
+frames.  QWIK relies on the cryptographic protocol implementation to avoid
+excessive buffering of data, see {{QWIK-TLS}}.  The implementation SHOULD
+provide an interface to QWIK to tell it about its buffering limits so that there
 is not excessive buffering at multiple layers.
 
 
@@ -899,7 +899,7 @@ based on current activity, system conditions, and other environmental factors.
 
 # Connections {#connections}
 
-A QUIC connection is a single conversation between two QUIC endpoints.  QUIC's
+A QWIK connection is a single conversation between two QWIK endpoints.  QWIK's
 connection establishment combines version negotiation with the cryptographic
 and transport handshakes to reduce connection establishment latency, as
 described in {{handshake}}.  Once established, a connection may migrate to a
@@ -915,7 +915,7 @@ selected by endpoints; each endpoint selects the connection IDs that its peer
 uses.
 
 The primary function of a connection ID is to ensure that changes in addressing
-at lower protocol layers (UDP, IP, and below) don't cause packets for a QUIC
+at lower protocol layers (UDP, IP, and below) don't cause packets for a QWIK
 connection to be delivered to the wrong endpoint.  Each endpoint selects
 connection IDs using an implementation-specific (and perhaps
 deployment-specific) method which will allow packets with that connection ID to
@@ -999,13 +999,13 @@ with an existing connection, or - for servers - potentially create a new
 connection.
 
 Hosts try to associate a packet with an existing connection. If the packet has a
-Destination Connection ID corresponding to an existing connection, QUIC
+Destination Connection ID corresponding to an existing connection, QWIK
 processes that packet accordingly. Note that more than one connection ID can be
 associated with a connection; see {{connection-id}}.
 
 If the Destination Connection ID is zero length and the packet matches the
 address/port tuple of a connection where the host did not require connection
-IDs, QUIC processes the packet as part of that connection. Endpoints MUST drop
+IDs, QWIK processes the packet as part of that connection. Endpoints MUST drop
 packets with zero-length Destination Connection ID fields if they do not
 correspond to a single connection.
 
@@ -1070,7 +1070,7 @@ SHOULD ignore any such packets.
 Servers MUST drop incoming packets under all other circumstances.
 
 
-## Life of a QUIC Connection {#connection-lifecycle}
+## Life of a QWIK Connection {#connection-lifecycle}
 
 TBD.
 
@@ -1082,13 +1082,13 @@ required here. -->
 
 # Version Negotiation {#version-negotiation}
 
-Version negotiation ensures that client and server agree to a QUIC version
+Version negotiation ensures that client and server agree to a QWIK version
 that is mutually supported. A server sends a Version Negotiation packet in
 response to each packet that might initiate a new connection, see
 {{packet-handling}} for details.
 
 The size of the first packet sent by a client will determine whether a server
-sends a Version Negotiation packet. Clients that support multiple QUIC versions
+sends a Version Negotiation packet. Clients that support multiple QWIK versions
 SHOULD pad the first packet they send to the largest of the minimum packet sizes
 across all versions they support. This ensures that the server responds if there
 is a mutually supported version.
@@ -1167,7 +1167,7 @@ solicit a list of supported versions from a server.
 <!-- TODO: Check flow to this section and see if this needs to be connected to
 the handshake example below. -->
 
-Address validation is used by QUIC to avoid being used for a traffic
+Address validation is used by QWIK to avoid being used for a traffic
 amplification attack.  In such an attack, a packet is sent to a server with
 spoofed source address information that identifies a victim.  If a server
 generates more or larger packets in response to that packet, the attacker can
@@ -1175,7 +1175,7 @@ use the server to send more data toward the victim than it would be able to send
 on its own.
 
 The primary defense against amplification attack is verifying that a client is
-able to receive packets at the transport address that it claims. QUIC also
+able to receive packets at the transport address that it claims. QWIK also
 requires that clients send UDP datagrams with at least 1200 octets of payload
 until the server has completed address validation. A server can thereby send
 more data to an unproven address without increasing the amplification advantage
@@ -1191,7 +1191,7 @@ request - in response to the data carried in the early data from the client.
 
 To send additional data prior to completing the cryptographic handshake, the
 server then needs to validate that the client owns the address that it claims.
-QUIC therefore performs source address validation during connection
+QWIK therefore performs source address validation during connection
 establishment.
 
 Servers MUST NOT send more than three times as many bytes as the number of bytes
@@ -1202,7 +1202,7 @@ the Handshake keys.  This limit exists to mitigate amplification attacks.
 
 In order to prevent this limit causing a handshake deadlock, the client SHOULD
 always send a packet upon a handshake timeout, as described in
-{{QUIC-RECOVERY}}.  If the client has no data to retransmit and does not have
+{{QWIK-RECOVERY}}.  If the client has no data to retransmit and does not have
 Handshake keys, it SHOULD send an Initial packet in a UDP datagram of at least
 1200 octets.  If the client has Handshake keys, it SHOULD send a Handshake
 packet.
@@ -1213,7 +1213,7 @@ migration, see {{migrate-validate}}.
 
 ### Client Address Validation Procedure
 
-QUIC uses token-based address validation.  Any time the server wishes to
+QWIK uses token-based address validation.  Any time the server wishes to
 validate a client address, it provides the client with a token.  As long as it
 is not possible for an attacker to generate a valid token for its address (see
 {{token-integrity}}) and the client is able to return that token, it proves to
@@ -1327,14 +1327,14 @@ the integrity protection key for tokens.
 
 # Cryptographic and Transport Handshake {#handshake}
 
-QUIC relies on a combined cryptographic and transport handshake to minimize
-connection establishment latency.  QUIC uses the CRYPTO frame {{frame-crypto}}
-to transmit the cryptographic handshake.  Version 0x00000001 of QUIC uses TLS
-1.3 as described in {{QUIC-TLS}}; a different QUIC version number could indicate
+QWIK relies on a combined cryptographic and transport handshake to minimize
+connection establishment latency.  QWIK uses the CRYPTO frame {{frame-crypto}}
+to transmit the cryptographic handshake.  Version 0x00000001 of QWIK uses TLS
+1.3 as described in {{QWIK-TLS}}; a different QWIK version number could indicate
 that a different cryptographic handshake protocol is in use.
 
-QUIC provides reliable, ordered delivery of the cryptographic handshake
-data. QUIC packet protection ensures confidentiality and integrity protection
+QWIK provides reliable, ordered delivery of the cryptographic handshake
+data. QWIK packet protection ensures confidentiality and integrity protection
 that meets the requirements of the cryptographic handshake protocol:
 
 * authenticated key exchange, where
@@ -1364,7 +1364,7 @@ a single packet. This avoids having to reassemble a message from multiple
 packets.
 
 The first client packet of the cryptographic handshake protocol MUST fit within
-a 1232 octet QUIC packet payload.  This includes overheads that reduce the space
+a 1232 octet QWIK packet payload.  This includes overheads that reduce the space
 available to the cryptographic handshake protocol.
 
 The CRYPTO frame can be sent in different packet number spaces.  The sequence
@@ -1374,7 +1374,7 @@ handshake data start from zero in each packet number space.
 
 ## Example Handshake Flows
 
-Details of how TLS is integrated with QUIC are provided in {{QUIC-TLS}}, but
+Details of how TLS is integrated with QWIK are provided in {{QWIK-TLS}}, but
 some examples are provided here.
 
 Once version negotiation is complete, the cryptographic handshake is used to
@@ -1382,12 +1382,12 @@ agree on cryptographic keys.  The cryptographic handshake is carried in Initial
 ({{packet-initial}}) and Handshake ({{packet-handshake}}) packets.
 
 {{tls-1rtt-handshake}} provides an overview of the 1-RTT handshake.  Each line
-shows a QUIC packet with the packet type and packet number shown first, followed
+shows a QWIK packet with the packet type and packet number shown first, followed
 by the frames that are typically contained in those packets. So, for instance
 the first packet is of type Initial, with packet number 0, and contains a CRYPTO
 frame carrying the ClientHello.
 
-Note that multiple QUIC packets -- even of different encryption levels -- may be
+Note that multiple QWIK packets -- even of different encryption levels -- may be
 coalesced into a single UDP datagram (see {{packet-coalesce}}), and so this
 handshake may consist of as few as 4 UDP datagrams, or any number more. For
 instance, the server's first flight contains packets from the Initial encryption
@@ -1499,7 +1499,7 @@ The very first packet sent by a client includes a random value for Destination
 Connection ID.  The same value MUST be used for all 0-RTT packets sent on that
 connection ({{packet-protected}}).  This randomized value is used to determine
 the packet protection keys for Initial packets (see Section 5.2 of
-{{QUIC-TLS}}).
+{{QWIK-TLS}}).
 
 A Version Negotiation ({{packet-version}}) packet MUST use both connection IDs
 selected by the client, swapped to ensure correct routing toward the client.
@@ -1520,7 +1520,7 @@ handling.
 The encoding of the transport parameters is detailed in
 {{transport-parameter-encoding}}.
 
-QUIC includes the encoded transport parameters in the cryptographic handshake.
+QWIK includes the encoded transport parameters in the cryptographic handshake.
 Once the handshake completes, the transport parameters declared by the peer are
 available.  Each endpoint validates the value provided by its peer.  In
 particular, version negotiation MUST be validated (see {{version-validation}})
@@ -1588,8 +1588,8 @@ New transport parameters can be registered according to the rules in
 
 ### Version Negotiation Validation {#version-validation}
 
-Though the cryptographic handshake has integrity protection, two forms of QUIC
-version downgrade are possible.  In the first, an attacker replaces the QUIC
+Though the cryptographic handshake has integrity protection, two forms of QWIK
+version downgrade are possible.  In the first, an attacker replaces the QWIK
 version in the Initial packet.  In the second, a fake Version Negotiation packet
 is sent by an attacker.  To protect against these attacks, the transport
 parameters include three fields that encode version information.  These
@@ -1612,23 +1612,23 @@ version negotiation was performed and validate the initial_version value.
 
 A server that does not maintain state for every packet it receives (i.e., a
 stateless server) uses a different process. If the initial_version matches the
-version of QUIC that is in use, a stateless server can accept the value.
+version of QWIK that is in use, a stateless server can accept the value.
 
-If the initial_version is different from the version of QUIC that is in use, a
+If the initial_version is different from the version of QWIK that is in use, a
 stateless server MUST check that it would have sent a Version Negotiation packet
 if it had received a packet with the indicated initial_version.  If a server
 would have accepted the version included in the initial_version and the value
-differs from the QUIC version that is in use, the server MUST terminate the
+differs from the QWIK version that is in use, the server MUST terminate the
 connection with a VERSION_NEGOTIATION_ERROR error.
 
-The server includes both the version of QUIC that is in use and a list of the
-QUIC versions that the server supports (see
+The server includes both the version of QWIK that is in use and a list of the
+QWIK versions that the server supports (see
 {{transport-parameter-definitions}}).
 
 The negotiated_version field is the version that is in use.  This MUST be set by
 the server to the value that is on the Initial packet that it accepts (not an
 Initial packet that triggers a Retry or Version Negotiation packet).  A client
-that receives a negotiated_version that does not match the version of QUIC that
+that receives a negotiated_version that does not match the version of QWIK that
 is in use MUST terminate the connection with a VERSION_NEGOTIATION_ERROR error
 code.
 
@@ -1640,17 +1640,17 @@ packet.
 The client validates that the negotiated_version is included in the
 supported_versions list and - if version negotiation was performed - that it
 would have selected the negotiated version.  A client MUST terminate the
-connection with a VERSION_NEGOTIATION_ERROR error code if the current QUIC
+connection with a VERSION_NEGOTIATION_ERROR error code if the current QWIK
 version is not listed in the supported_versions list.  A client MUST terminate
 with a VERSION_NEGOTIATION_ERROR error code if version negotiation occurred but
 it would have selected a different version based on the value of the
 supported_versions list.
 
-When an endpoint accepts multiple QUIC versions, it can potentially interpret
-transport parameters as they are defined by any of the QUIC versions it
-supports.  The version field in the QUIC packet header is authenticated using
+When an endpoint accepts multiple QWIK versions, it can potentially interpret
+transport parameters as they are defined by any of the QWIK versions it
+supports.  The version field in the QWIK packet header is authenticated using
 transport parameters.  The position and the format of the version fields in
-transport parameters MUST either be identical across different QUIC versions, or
+transport parameters MUST either be identical across different QWIK versions, or
 be unambiguously different to ensure no confusion about their interpretation.
 One way that a new format could be introduced is to define a TLS extension with
 a different codepoint.
@@ -1791,7 +1791,7 @@ migrating to a new network.  This section describes the process by which an
 endpoint migrates to a new address.
 
 An endpoint MUST NOT initiate connection migration before the handshake is
-finished and the endpoint has 1-RTT keys.  The design of QUIC relies on
+finished and the endpoint has 1-RTT keys.  The design of QWIK relies on
 endpoints retaining a stable address for the duration of the handshake.
 
 An endpoint also MUST NOT initiate connection migration if the peer sent the
@@ -1904,11 +1904,11 @@ peer's new address to confirm the peer's possession of the new address.  Until a
 peer's address is deemed valid, an endpoint MUST limit the rate at which it
 sends data to this address.  The endpoint MUST NOT send more than a minimum
 congestion window's worth of data per estimated round-trip time (kMinimumWindow,
-as defined in {{QUIC-RECOVERY}}).  In the absence of this limit, an endpoint
+as defined in {{QWIK-RECOVERY}}).  In the absence of this limit, an endpoint
 risks being used for a denial of service attack against an unsuspecting victim.
 Note that since the endpoint will not have any round-trip time measurements to
 this address, the estimate SHOULD be the default initial value (see
-{{QUIC-RECOVERY}}).
+{{QWIK-RECOVERY}}).
 
 If an endpoint skips validation of a peer address as described in
 {{migration-response}}, it does not need to limit its sending rate.
@@ -1963,7 +1963,7 @@ multiple paths will still send ACK frames covering all received packets.
 
 While multiple paths might be used during connection migration, a single
 congestion control context and a single loss recovery context (as described in
-{{QUIC-RECOVERY}}) may be adequate.  A sender can make exceptions for probe
+{{QWIK-RECOVERY}}) may be adequate.  A sender can make exceptions for probe
 packets so that their loss detection is independent and does not unduly cause
 the congestion controller to reduce its sending rate.  An endpoint might set a
 separate timer when a PATH_CHALLENGE is sent, which is cancelled when the
@@ -2020,7 +2020,7 @@ Caution:
 
 ## Server's Preferred Address {#preferred-address}
 
-QUIC allows servers to accept connections on one IP address and attempt to
+QWIK allows servers to accept connections on one IP address and attempt to
 transfer these connections to a more preferred address shortly after the
 handshake.  This is particularly useful when clients initially connect to an
 address shared by multiple servers but would prefer to use a unicast address to
@@ -2096,13 +2096,13 @@ address before path validation is complete.
 <!-- TODO: Should this be moved to the ack section? Find a good home for this
 section. -->
 
-QUIC endpoints use Explicit Congestion Notification (ECN) {{!RFC3168}} to detect
+QWIK endpoints use Explicit Congestion Notification (ECN) {{!RFC3168}} to detect
 and respond to network congestion.  ECN allows a network node to indicate
 congestion in the network by setting a codepoint in the IP header of a packet
 instead of dropping it.  Endpoints react to congestion by reducing their sending
-rate in response, as described in {{QUIC-RECOVERY}}.
+rate in response, as described in {{QWIK-RECOVERY}}.
 
-To use ECN, QUIC endpoints first determine whether a path supports ECN marking
+To use ECN, QWIK endpoints first determine whether a path supports ECN marking
 and the peer is able to access the ECN codepoint in the IP header.  A network
 path does not support ECN if ECN marked packets get dropped or ECN markings are
 rewritten on the path. An endpoint verifies the path, both during connection
@@ -2166,7 +2166,7 @@ not support ECN.
 
 If an endpoint sets ECT codepoints on outgoing packets and encounters a
 retransmission timeout due to the absence of acknowledgments from the peer (see
-{{QUIC-RECOVERY}}), or if an endpoint has reason to believe that a network
+{{QWIK-RECOVERY}}), or if an endpoint has reason to believe that a network
 element might be corrupting ECN codepoints, the endpoint MAY cease setting ECT
 codepoints in subsequent packets. Doing so allows the connection to traverse
 network elements that drop or corrupt ECN codepoints in the IP header.
@@ -2175,7 +2175,7 @@ network elements that drop or corrupt ECN codepoints in the IP header.
 # Connection Termination {#termination}
 
 Connections should remain open until they become idle for a pre-negotiated
-period of time.  A QUIC connection, once established, can be terminated in one
+period of time.  A QWIK connection, once established, can be terminated in one
 of three ways:
 
 * idle timeout ({{idle-timeout}})
@@ -2188,14 +2188,14 @@ of three ways:
 The closing and draining connection states exist to ensure that connections
 close cleanly and that delayed or reordered packets are properly discarded.
 These states SHOULD persist for three times the current Retransmission Timeout
-(RTO) interval as defined in {{QUIC-RECOVERY}}.
+(RTO) interval as defined in {{QWIK-RECOVERY}}.
 
 An endpoint enters a closing period after initiating an immediate close
 ({{immediate-close}}).  While closing, an endpoint MUST NOT send packets unless
 they contain a CONNECTION_CLOSE or APPLICATION_CLOSE frame (see
 {{immediate-close}} for details).  An endpoint retains only enough information
 to generate a packet containing a closing frame and to identify packets as
-belonging to the connection.  The connection ID and QUIC version is sufficient
+belonging to the connection.  The connection ID and QWIK version is sufficient
 information to identify packets for a closing connection; an endpoint can
 discard all other connection state.  An endpoint MAY retain packet protection
 keys for incoming packets to allow it to read and process a closing frame.
@@ -2215,7 +2215,7 @@ closing packet.
 Disposing of connection state prior to the end of the closing or draining period
 could cause delayed or reordered packets to be handled poorly.  Endpoints that
 have some alternative means to ensure that late-arriving packets on the
-connection do not create QUIC state, such as those that are able to close the
+connection do not create QWIK state, such as those that are able to close the
 UDP socket, MAY use an abbreviated draining period which can allow for faster
 resource recovery.  Servers that retain an open socket for accepting new
 connections SHOULD NOT exit the closing or draining period early.
@@ -2260,7 +2260,7 @@ endpoint is only used to determine whether the connection is live at that
 endpoint.  An endpoint that sends packets near the end of the idle timeout
 period of a peer risks having those packets discarded if its peer enters the
 draining state before the packets arrive.  If a peer could timeout within an RTO
-(see Section 4.3.3 of {{QUIC-RECOVERY}}), it is advisable to test for liveness
+(see Section 4.3.3 of {{QWIK-RECOVERY}}), it is advisable to test for liveness
 before sending any data that cannot be retried safely.
 
 
@@ -2360,12 +2360,12 @@ with a larger minimum AEAD expansion.
 
 An endpoint SHOULD NOT send a stateless reset that is significantly larger than
 the packet it receives.  Endpoints MUST discard packets that are too small to be
-valid QUIC packets.  With the set of AEAD functions defined in {{QUIC-TLS}},
+valid QWIK packets.  With the set of AEAD functions defined in {{QWIK-TLS}},
 packets less than 19 octets long are never valid.
 
 An endpoint MAY send a stateless reset in response to a packet with a long
 header.  This would not be effective if the stateless reset token was not yet
-available to a peer.  In this QUIC version, packets with a long header are only
+available to a peer.  In this QWIK version, packets with a long header are only
 used during connection establishment.   Because the stateless reset token is not
 available until connection establishment is complete or near completion,
 ignoring an unknown packet with a long header might be more effective.
@@ -2399,11 +2399,11 @@ A stateless reset is not appropriate for signaling error conditions.  An
 endpoint that wishes to communicate a fatal connection error MUST use a
 CONNECTION_CLOSE or APPLICATION_CLOSE frame if it has sufficient state to do so.
 
-This stateless reset design is specific to QUIC version 1.  An endpoint that
-supports multiple versions of QUIC needs to generate a stateless reset that will
+This stateless reset design is specific to QWIK version 1.  An endpoint that
+supports multiple versions of QWIK needs to generate a stateless reset that will
 be accepted by peers that support any version that the endpoint might support
 (or might have supported prior to losing state).  Designers of new versions of
-QUIC need to be aware of this and either reuse this design, or use a portion of
+QWIK need to be aware of this and either reuse this design, or use a portion of
 the packet other than the last 16 octets for carrying data.
 
 
@@ -2554,11 +2554,11 @@ between endpoints.
 
 # Packets and Frames {#packets-frames}
 
-QUIC endpoints communicate by exchanging packets. Packets are carried in UDP
+QWIK endpoints communicate by exchanging packets. Packets are carried in UDP
 datagrams (see {{packet-coalesce}}) and have confidentiality and integrity
 protection (see {{packet-protected}}).
 
-This version of QUIC uses the long packet header (see {{long-header}}) during
+This version of QWIK uses the long packet header (see {{long-header}}) during
 connection establishment and the short header (see {{short-header}}) once 1-RTT
 keys have been established.
 
@@ -2575,10 +2575,10 @@ Version negotiation uses a packet with a special format (see
 
 ## Protected Packets {#packet-protected}
 
-All QUIC packets except Version Negotiation and Retry packets use authenticated
+All QWIK packets except Version Negotiation and Retry packets use authenticated
 encryption with additional data (AEAD) {{!RFC5119}} to provide confidentiality
 and integrity protection. Details of packet protection are found in
-{{QUIC-TLS}}; this section includes an overview of the process.
+{{QWIK-TLS}}; this section includes an overview of the process.
 
 Initial packets are protected using keys that are statically derived. This
 packet protection is not effective confidentiality protection, it only exists to
@@ -2597,13 +2597,13 @@ corresponding keys.
 
 The packet number field contains a packet number, which has additional
 confidentiality protection that is applied after packet protection is applied
-(see {{QUIC-TLS}} for details).  The underlying packet number increases with
+(see {{QWIK-TLS}} for details).  The underlying packet number increases with
 each packet sent, see {{packet-numbers}} for details.
 
 
 ## Coalescing Packets {#packet-coalesce}
 
-A sender can coalesce multiple QUIC packets into one UDP datagram.  This can
+A sender can coalesce multiple QWIK packets into one UDP datagram.  This can
 reduce the number of UDP datagrams needed to complete the cryptographic
 handshake and starting sending data.  Receivers MUST be able to process
 coalesced packets.
@@ -2613,14 +2613,14 @@ Handshake, 1-RTT) makes it more likely the receiver will be able to process all
 the packets in a single pass.  A packet with a short header does not include a
 length, so it will always be the last packet included in a UDP datagram.
 
-Senders MUST NOT coalesce QUIC packets for different connections into a single
+Senders MUST NOT coalesce QWIK packets for different connections into a single
 UDP datagram. Receivers SHOULD ignore any subsequent packets with a different
 Destination Connection ID than the first packet in the datagram.
 
-Every QUIC packet that is coalesced into a single UDP datagram is separate and
+Every QWIK packet that is coalesced into a single UDP datagram is separate and
 complete.  Though the values of some fields in the packet header might be
-redundant, no fields are omitted.  The receiver of coalesced QUIC packets MUST
-individually process each QUIC packet and separately acknowledge them, as if
+redundant, no fields are omitted.  The receiver of coalesced QWIK packets MUST
+individually process each QWIK packet and separately acknowledge them, as if
 they were received as the payload of different UDP datagrams.  If one or more
 packets in a datagram cannot be processed yet (because the keys are not yet
 available) or processing fails (decryption failure, unknown type, etc.), the
@@ -2646,14 +2646,14 @@ receiving.
 Version Negotiation ({{packet-version}}) and Retry {{packet-retry}} packets do
 not include a packet number.
 
-Packet numbers are divided into 3 spaces in QUIC:
+Packet numbers are divided into 3 spaces in QWIK:
 
 - Initial space: All Initial packets {{packet-initial}} are in this space.
 - Handshake space: All Handshake packets {{packet-handshake}} are in this space.
 - Application data space: All 0-RTT and 1-RTT encrypted packets
   {{packet-protected}} are in this space.
 
-As described in {{QUIC-TLS}}, each packet type uses different protection keys.
+As described in {{QWIK-TLS}}, each packet type uses different protection keys.
 
 Conceptually, a packet number space is the context in which a packet can be
 processed and acknowledged.  Initial packets can only be sent with Initial
@@ -2669,7 +2669,7 @@ packet number by at least one.
 0-RTT and 1-RTT data exist in the same packet number space to make loss recovery
 algorithms easier to implement between the two packet types.
 
-A QUIC endpoint MUST NOT reuse a packet number within the same packet number
+A QWIK endpoint MUST NOT reuse a packet number within the same packet number
 space in one connection (that is, under the same cryptographic keys).  If the
 packet number for sending reaches 2^62 - 1, the sender MUST close the connection
 without sending a CONNECTION_CLOSE frame or any further packets; an endpoint MAY
@@ -2679,7 +2679,7 @@ it receives.
 A receiver MUST discard a newly unprotected packet unless it is certain that it
 has not processed another packet with the same packet number from the same
 packet number space. Duplicate suppression MUST happen after removing packet
-protection for the reasons described in Section 9.3 of {{QUIC-TLS}}. An
+protection for the reasons described in Section 9.3 of {{QWIK-TLS}}. An
 efficient algorithm for duplicate suppression can be found in Section 3.4.3 of
 {{?RFC2406}}.
 
@@ -2689,7 +2689,7 @@ Packet number encoding at a sender and decoding at a receiver are described in
 
 ## Frames and Frame Types {#frames}
 
-The payload of QUIC packets, after removing packet protection, commonly consists
+The payload of QWIK packets, after removing packet protection, commonly consists
 of a sequence of frames, as shown in {{packet-frames}}.  Version Negotiation,
 Stateless Reset, and Retry packets do not contain frames.
 
@@ -2709,12 +2709,12 @@ frames. -->
 |                          Frame N (*)                        ...
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 ~~~
-{: #packet-frames title="QUIC Payload"}
+{: #packet-frames title="QWIK Payload"}
 
-QUIC payloads MUST contain at least one frame, and MAY contain multiple frames
+QWIK payloads MUST contain at least one frame, and MAY contain multiple frames
 and multiple frame types.
 
-Frames MUST fit within a single QUIC packet and MUST NOT span a QUIC packet
+Frames MUST fit within a single QWIK packet and MUST NOT span a QWIK packet
 boundary. Each frame begins with a Frame Type, indicating its type, followed by
 additional type-dependent fields:
 
@@ -2758,7 +2758,7 @@ frames are explained in more detail in {{frame-formats}}.
 | 0x1a - 0x1b | ACK                  | {{frame-ack}}                  |
 {: #frame-types title="Frame Types"}
 
-All QUIC frames are idempotent.  That is, a valid frame does not cause
+All QWIK frames are idempotent.  That is, a valid frame does not cause
 undesirable side effects or errors when received more than once.
 
 The Frame Type field uses a variable length integer encoding (see
@@ -2776,10 +2776,10 @@ a connection error of type PROTOCOL_VIOLATION.
 
 # Packetization and Reliability {#packetization}
 
-A sender bundles one or more frames in a QUIC packet (see {{frames}}).
+A sender bundles one or more frames in a QWIK packet (see {{frames}}).
 
 A sender can minimize per-packet bandwidth and computational costs by bundling
-as many frames as possible within a QUIC packet.  A sender MAY wait for a short
+as many frames as possible within a QWIK packet.  A sender MAY wait for a short
 period of time to bundle multiple frames before sending a packet that is not
 maximally packed, to avoid sending out large numbers of small packets.  An
 implementation may use knowledge about application sending behavior or
@@ -2789,14 +2789,14 @@ conservatively, since any delay is likely to increase application-visible
 latency.
 
 Stream multiplexing is achieved by interleaving STREAM frames from multiple
-streams into one or more QUIC packets.  A single QUIC packet can include
+streams into one or more QWIK packets.  A single QWIK packet can include
 multiple STREAM frames from one or more streams.
 
-One of the benefits of QUIC is avoidance of head-of-line blocking across
+One of the benefits of QWIK is avoidance of head-of-line blocking across
 multiple streams.  When a packet loss occurs, only streams with data in that
 packet are blocked waiting for a retransmission to be received, while other
 streams can continue making progress.  Note that when data from multiple streams
-is bundled into a single QUIC packet, loss of that packet blocks all those
+is bundled into a single QWIK packet, loss of that packet blocks all those
 streams from making progress.  Implementations are advised to bundle as few
 streams as necessary in outgoing packets without losing transmission efficiency
 to underfilled packets.
@@ -2830,8 +2830,8 @@ ACK frames in response to other packets.
 
 While PADDING frames do not elicit an ACK frame from a receiver, they are
 considered to be in flight for congestion control purposes
-{{QUIC-RECOVERY}}. Sending only PADDING frames might cause the sender to become
-limited by the congestion controller (as described in {{QUIC-RECOVERY}}) with no
+{{QWIK-RECOVERY}}. Sending only PADDING frames might cause the sender to become
+limited by the congestion controller (as described in {{QWIK-RECOVERY}}) with no
 acknowledgments forthcoming from the receiver. Therefore, a sender should ensure
 that other frames are sent in addition to PADDING frames to elicit
 acknowledgments from the receiver.
@@ -2846,7 +2846,7 @@ needing acknowledgement are received.  The sender can use the receiver's
 `max_ack_delay` value in determining timeouts for timer-based retransmission.
 
 Strategies and implications of the frequency of generating acknowledgments are
-discussed in more detail in {{QUIC-RECOVERY}}.
+discussed in more detail in {{QWIK-RECOVERY}}.
 
 To limit ACK Blocks to those that have not yet been received by the sender, the
 receiver SHOULD track which ACK frames have been acknowledged by its peer.  Once
@@ -2861,7 +2861,7 @@ bundle ACK frames with other frames when possible.
 To limit receiver state or the size of ACK frames, a receiver MAY limit the
 number of ACK Blocks it sends.  A receiver can do this even without receiving
 acknowledgment of its ACK frames, with the knowledge this could cause the sender
-to unnecessarily retransmit some data.  Standard QUIC {{QUIC-RECOVERY}}
+to unnecessarily retransmit some data.  Standard QWIK {{QWIK-RECOVERY}}
 algorithms declare packets lost after sufficiently newer packets are
 acknowledged.  Therefore, the receiver SHOULD repeatedly acknowledge newly
 received packets in preference to packets received in the past.
@@ -2880,12 +2880,12 @@ messages are delayed or lost.  Note that the same limitation applies to other
 data sent by the server protected by the 1-RTT keys.
 
 Endpoints SHOULD send acknowledgments for packets containing CRYPTO frames with
-a reduced delay; see Section 4.3.1 of {{QUIC-RECOVERY}}.
+a reduced delay; see Section 4.3.1 of {{QWIK-RECOVERY}}.
 
 
 ## Retransmission of Information
 
-QUIC packets that are determined to be lost are not retransmitted whole. The
+QWIK packets that are determined to be lost are not retransmitted whole. The
 same applies to the frames that are contained within lost packets. Instead, the
 information that might be carried in frames is sent again in new frames as
 needed.
@@ -2896,7 +2896,7 @@ information is determined to be lost and sending ceases when a packet
 containing that information is acknowledged.
 
 * Data sent in CRYPTO frames is retransmitted according to the rules in
-  {{QUIC-RECOVERY}}, until either all data has been acknowledged or the crypto
+  {{QWIK-RECOVERY}}, until either all data has been acknowledged or the crypto
   state machine implicitly knows that the peer received the data.
 
 * Application data sent in STREAM frames is retransmitted in new STREAM frames
@@ -2969,12 +2969,12 @@ containing that information is acknowledged.
 
 Upon detecting losses, a sender MUST take appropriate congestion control action.
 The details of loss detection and congestion control are described in
-{{QUIC-RECOVERY}}.
+{{QWIK-RECOVERY}}.
 
 
 # Packet Size {#packet-size}
 
-The QUIC packet size includes the QUIC header and integrity check, but not the
+The QWIK packet size includes the QWIK header and integrity check, but not the
 UDP or IP header.
 
 Clients MUST ensure that the first Initial packet they send is sent in a UDP
@@ -3005,34 +3005,34 @@ address of the client, see {{address-validation}}.
 ## Path Maximum Transmission Unit
 
 The Path Maximum Transmission Unit (PMTU) is the maximum size of the entire IP
-header, UDP header, and UDP payload. The UDP payload includes the QUIC packet
+header, UDP header, and UDP payload. The UDP payload includes the QWIK packet
 header, protected payload, and any authentication fields.
 
-All QUIC packets SHOULD be sized to fit within the estimated PMTU to avoid IP
+All QWIK packets SHOULD be sized to fit within the estimated PMTU to avoid IP
 fragmentation or packet drops. To optimize bandwidth efficiency, endpoints
 SHOULD use Packetization Layer PMTU Discovery ({{!PLPMTUD=RFC4821}}).  Endpoints
 MAY use PMTU Discovery ({{!PMTUDv4=RFC1191}}, {{!PMTUDv6=RFC8201}}) for
 detecting the PMTU, setting the PMTU appropriately, and storing the result of
 previous PMTU determinations.
 
-In the absence of these mechanisms, QUIC endpoints SHOULD NOT send IP packets
+In the absence of these mechanisms, QWIK endpoints SHOULD NOT send IP packets
 larger than 1280 octets. Assuming the minimum IP header size, this results in
-a QUIC packet size of 1232 octets for IPv6 and 1252 octets for IPv4. Some
-QUIC implementations MAY be more conservative in computing allowed QUIC packet
+a QWIK packet size of 1232 octets for IPv6 and 1252 octets for IPv4. Some
+QWIK implementations MAY be more conservative in computing allowed QWIK packet
 size given unknown tunneling overheads or IP header options.
 
-QUIC endpoints that implement any kind of PMTU discovery SHOULD maintain an
+QWIK endpoints that implement any kind of PMTU discovery SHOULD maintain an
 estimate for each combination of local and remote IP addresses.  Each pairing of
 local and remote addresses could have a different maximum MTU in the path.
 
-QUIC depends on the network path supporting an MTU of at least 1280 octets. This
+QWIK depends on the network path supporting an MTU of at least 1280 octets. This
 is the IPv6 minimum MTU and therefore also supported by most modern IPv4
 networks.  An endpoint MUST NOT reduce its MTU below this number, even if it
 receives signals that indicate a smaller limit might exist.
 
-If a QUIC endpoint determines that the PMTU between any pair of local and remote
+If a QWIK endpoint determines that the PMTU between any pair of local and remote
 IP addresses has fallen below 1280 octets, it MUST immediately cease sending
-QUIC packets on the affected path.  This could result in termination of the
+QWIK packets on the affected path.  This could result in termination of the
 connection if an alternative path cannot be found.
 
 ### IPv4 PMTU Discovery {#v4-pmtud}
@@ -3042,7 +3042,7 @@ vulnerable to off-path attacks that successfully guess the IP/port 4-tuple and
 reduce the MTU to a bandwidth-inefficient value. TCP connections mitigate this
 risk by using the (at minimum) 8 bytes of transport header echoed in the ICMP
 message to validate the TCP sequence number as valid for the current
-connection. However, as QUIC operates over UDP, in IPv4 the echoed information
+connection. However, as QWIK operates over UDP, in IPv4 the echoed information
 could consist only of the IP and UDP headers, which usually has insufficient
 entropy to mitigate off-path attacks.
 
@@ -3058,7 +3058,7 @@ example, the IP ID or UDP checksum) to further authenticate incoming Datagram
 Too Big messages.
 
 * Any reduction in PMTU due to a report contained in an ICMP packet is
-provisional until QUIC's loss detection algorithm determines that the packet is
+provisional until QWIK's loss detection algorithm determines that the packet is
 actually lost.
 
 
@@ -3074,27 +3074,27 @@ window, which may delay the transmission of subsequent application data.
 When implementing the algorithm in Section 7.2 of {{!PLPMTUD}}, the initial
 value of search_low SHOULD be consistent with the IPv6 minimum packet size.
 Paths that do not support this size cannot deliver Initial packets, and
-therefore are not QUIC-compliant.
+therefore are not QWIK-compliant.
 
 Section 7.3 of {{!PLPMTUD}} discusses trade-offs between small and large
-increases in the size of probe packets. As QUIC probe packets need not contain
+increases in the size of probe packets. As QWIK probe packets need not contain
 application data, aggressive increases in probe size carry fewer consequences.
 
 
 
 # Versions {#versions}
 
-QUIC versions are identified using a 32-bit unsigned number.
+QWIK versions are identified using a 32-bit unsigned number.
 
 The version 0x00000000 is reserved to represent version negotiation.  This
 version of the specification is identified by the number 0x00000001.
 
-Other versions of QUIC might have different properties to this version.  The
-properties of QUIC that are guaranteed to be consistent across all versions of
-the protocol are described in {{QUIC-INVARIANTS}}.
+Other versions of QWIK might have different properties to this version.  The
+properties of QWIK that are guaranteed to be consistent across all versions of
+the protocol are described in {{QWIK-INVARIANTS}}.
 
-Version 0x00000001 of QUIC uses TLS as a cryptographic handshake protocol, as
-described in {{QUIC-TLS}}.
+Version 0x00000001 of QWIK uses TLS as a cryptographic handshake protocol, as
+described in {{QWIK-TLS}}.
 
 Versions with the most significant 16 bits of the version number cleared are
 reserved for use in future IETF consensus documents.
@@ -3119,19 +3119,19 @@ Version numbers used to identify IETF drafts are created by adding the draft
 number to 0xff000000.  For example, draft-ietf-quic-transport-13 would be
 identified as 0xff00000D.
 
-Implementors are encouraged to register version numbers of QUIC that they are
+Implementors are encouraged to register version numbers of QWIK that they are
 using for private experimentation on the GitHub wiki at
-\<https://github.com/quicwg/base-drafts/wiki/QUIC-Versions\>.
+\<https://github.com/quicwg/base-drafts/wiki/QWIK-Versions\>.
 
 
 
 # Variable-Length Integer Encoding {#integer-encoding}
 
-QUIC packets and frames commonly use a variable-length encoding for non-negative
+QWIK packets and frames commonly use a variable-length encoding for non-negative
 integer values.  This encoding ensures that smaller integer values need fewer
 octets to encode.
 
-The QUIC variable-length integer encoding reserves the two most significant bits
+The QWIK variable-length integer encoding reserves the two most significant bits
 of the first octet to encode the base 2 logarithm of the integer encoding length
 in octets.  The integer value is encoded on the remaining bits, in network byte
 order.
@@ -3185,7 +3185,7 @@ Note that these encodings are similar to those in {{integer-encoding}}, but
 use different values.
 
 Finally, the encoded packet number is protected as described in Section 5.3 of
-{{QUIC-TLS}}.
+{{QWIK-TLS}}.
 
 The sender MUST use a packet number size able to represent more than twice as
 large a range than the difference between the largest acknowledged packet and
@@ -3264,8 +3264,8 @@ Long Packet Type:
 
 Version:
 
-: The QUIC Version is a 32-bit field that follows the Type.  This field
-  indicates which version of QUIC is in use and determines how the rest of the
+: The QWIK Version is a 32-bit field that follows the Type.  This field
+  indicates which version of QWIK is in use and determines how the rest of the
   protocol fields are interpreted.
 
 DCIL and SCIL:
@@ -3303,7 +3303,7 @@ Packet Number:
 
 : The packet number field is 1, 2, or 4 octets long. The packet number has
   confidentiality protection separate from packet protection, as described in
-  Section 5.3 of {{QUIC-TLS}}. The length of the packet number field is encoded
+  Section 5.3 of {{QWIK-TLS}}. The length of the packet number field is encoded
   in the plaintext packet number. See {{packet-encoding}} for details.
 
 Payload:
@@ -3328,8 +3328,8 @@ format. The same applies when implementing this. -->
 The header form, type, connection ID lengths octet, destination and source
 connection IDs, and version fields of a long header packet are
 version-independent. The packet number and values for packet types defined in
-{{long-packet-types}} are version-specific.  See {{QUIC-INVARIANTS}} for details
-on how packets from different versions of QUIC are interpreted.
+{{long-packet-types}} are version-specific.  See {{QWIK-INVARIANTS}} for details
+on how packets from different versions of QWIK are interpreted.
 
 The interpretation of the fields and the payload are specific to a version and
 packet type.  Type-specific semantics for this version are described in the
@@ -3370,7 +3370,7 @@ Key Phase Bit:
 
 : The second bit (0x40) of octet 0 indicates the key phase, which allows a
   recipient of a packet to identify the packet protection keys that are used to
-  protect the packet.  See {{QUIC-TLS}} for details.
+  protect the packet.  See {{QWIK-TLS}} for details.
 
 \[\[Editor's Note: this section should be removed and the bit definitions
 changed before this draft goes to the IESG.]]
@@ -3389,14 +3389,14 @@ Fourth Bit:
 \[\[Editor's Note: this section should be removed and the bit definitions
 changed before this draft goes to the IESG.]]
 
-Google QUIC Demultiplexing Bit:
+Google QWIK Demultiplexing Bit:
 
 : The fifth bit (0x8) of octet 0 is set to 0. This allows implementations of
-  Google QUIC to distinguish Google QUIC packets from short header packets sent
-  by a client because Google QUIC servers expect the connection ID to always be
+  Google QWIK to distinguish Google QWIK packets from short header packets sent
+  by a client because Google QWIK servers expect the connection ID to always be
   present.
   The special interpretation of this bit SHOULD be removed from this
-  specification when Google QUIC has finished transitioning to the new header
+  specification when Google QWIK has finished transitioning to the new header
   format.
 
 Reserved:
@@ -3417,7 +3417,7 @@ Packet Number:
 
 : The packet number field is 1, 2, or 4 octets long. The packet number has
   confidentiality protection separate from packet protection, as described in
-  Section 5.3 of {{QUIC-TLS}}. The length of the packet number field is encoded
+  Section 5.3 of {{QWIK-TLS}}. The length of the packet number field is encoded
   in the plaintext packet number. See {{packet-encoding}} for details.
 
 Protected Payload:
@@ -3425,9 +3425,9 @@ Protected Payload:
 : Packets with a short header always include a 1-RTT protected payload.
 
 The header form and connection ID field of a short header packet are
-version-independent.  The remaining fields are specific to the selected QUIC
-version.  See {{QUIC-INVARIANTS}} for details on how packets from different
-versions of QUIC are interpreted.
+version-independent.  The remaining fields are specific to the selected QWIK
+version.  See {{QWIK-INVARIANTS}} for details on how packets from different
+versions of QWIK are interpreted.
 
 
 ## Version Negotiation Packet {#packet-version}
@@ -3502,7 +3502,7 @@ carries ACKs in either direction.
 
 In order to prevent tampering by version-unaware middleboxes, Initial packets
 are protected with connection- and version-specific keys (Initial keys) as
-described in {{QUIC-TLS}}.  This protection does not provide confidentiality or
+described in {{QWIK-TLS}}.  This protection does not provide confidentiality or
 integrity against on-path attackers, but provides some level of protection
 against off-path attackers.
 
@@ -3677,7 +3677,7 @@ wishes to perform a stateless retry (see {{stateless-retry}}).
 {: #retry-format title="Retry Packet"}
 
 A Retry packet (shown in {{retry-format}}) only uses the invariant portion of
-the long packet header {{QUIC-INVARIANTS}}; that is, the fields up to and
+the long packet header {{QWIK-INVARIANTS}}; that is, the fields up to and
 including the Destination and Source Connection ID fields.  A Retry packet does
 not contain any protected fields.  Like Version Negotiation, a Retry packet
 contains the long header including the connection IDs, but omits the Length,
@@ -3817,11 +3817,11 @@ language from Section 3 of {{!TLS13=RFC8446}}.
 ~~~
 {: #figure-transport-parameters title="Definition of TransportParameters"}
 
-The `extension_data` field of the quic_transport_parameters extension defined in
-{{QUIC-TLS}} contains a TransportParameters value.  TLS encoding rules are
+The `extension_data` field of the qwik_transport_parameters extension defined in
+{{QWIK-TLS}} contains a TransportParameters value.  TLS encoding rules are
 therefore used to describe the encoding of transport parameters.
 
-QUIC encodes transport parameters into a sequence of octets, which are then
+QWIK encodes transport parameters into a sequence of octets, which are then
 included in the cryptographic handshake.
 
 
@@ -3966,7 +3966,7 @@ parameters as a connection error of type TRANSPORT_PARAMETER_ERROR.
 # Frame Types and Formats {#frame-formats}
 
 As described in {{frames}}, packets contain one or more frames. This section
-describes the format and semantics of the core QUIC frame types.
+describes the format and semantics of the core QWIK frame types.
 
 
 ## PADDING Frame {#frame-padding}
@@ -4028,7 +4028,7 @@ Final Offset:
 
 An endpoint sends a CONNECTION_CLOSE frame (type=0x02) to notify its peer that
 the connection is being closed.  CONNECTION_CLOSE is used to signal errors at
-the QUIC layer, or the absence of errors (with the NO_ERROR code).
+the QWIK layer, or the absence of errors (with the NO_ERROR code).
 
 If there are open streams that haven't been explicitly closed, they are
 implicitly closed when the connection is closed.
@@ -4079,7 +4079,7 @@ Reason Phrase:
 ## APPLICATION_CLOSE frame {#frame-application-close}
 
 An APPLICATION_CLOSE frame (type=0x03) is used to signal an error with the
-protocol that uses QUIC.
+protocol that uses QWIK.
 
 The APPLICATION_CLOSE frame is as follows:
 
@@ -4493,7 +4493,7 @@ ACK Blocks are ranges of acknowledged packets. If the frame type is 0x1b, ACK
 frames also contain the sum of ECN marks received on the connection up until
 this point.
 
-QUIC acknowledgements are irrevocable.  Once acknowledged, a packet remains
+QWIK acknowledgements are irrevocable.  Once acknowledged, a packet remains
 acknowledged, even if it does not appear in a future ACK frame.  This is unlike
 TCP SACKs ({{?RFC2018}}).
 
@@ -4532,7 +4532,7 @@ Largest Acknowledged:
 : A variable-length integer representing the largest packet number the peer is
   acknowledging; this is usually the largest packet number that the peer has
   received prior to generating the ACK frame.  Unlike the packet number in the
-  QUIC long or short header, the value in an ACK frame is not truncated.
+  QWIK long or short header, the value in an ACK frame is not truncated.
 
 ACK Delay:
 
@@ -4874,12 +4874,12 @@ FIN bit.
 
 ## Extension Frames
 
-QUIC frames do not use a self-describing encoding.  An endpoint therefore needs
+QWIK frames do not use a self-describing encoding.  An endpoint therefore needs
 to understand the syntax of all frames before it can successfully process a
 packet.  This allows for efficient encoding of frames, but it means that an
 endpoint cannot send a frame of a type that is unknown to its peer.
 
-An extension to QUIC that wishes to use a new type of frame MUST first ensure
+An extension to QWIK that wishes to use a new type of frame MUST first ensure
 that a peer is able to understand the frame.  An endpoint can use a transport
 parameter to signal its willingness to receive one or more extension frame types
 with the one transport parameter.
@@ -4896,9 +4896,9 @@ An IANA registry is used to manage the assignment of frame types, see
 
 # Transport Error Codes {#error-codes}
 
-QUIC error codes are 16-bit unsigned integers.
+QWIK error codes are 16-bit unsigned integers.
 
-This section lists the defined QUIC transport error codes that may be used in a
+This section lists the defined QWIK transport error codes that may be used in a
 CONNECTION_CLOSE frame.  These errors apply to the entire connection.
 
 NO_ERROR (0x0):
@@ -4971,7 +4971,7 @@ CRYPTO_ERROR (0x1XX):
 : The cryptographic handshake failed.  A range of 256 values is reserved for
   carrying error codes specific to the cryptographic handshake that is used.
   Codes for errors occurring when TLS is used for the crypto handshake are
-  described in Section 4.8 of {{QUIC-TLS}}.
+  described in Section 4.8 of {{QWIK-TLS}}.
 
 See {{iana-error-codes}} for details of registering new error codes.
 
@@ -4985,7 +4985,7 @@ Application protocol error codes are used for the RST_STREAM
 frames.
 
 There is no restriction on the use of the 16-bit error code space for
-application protocols.  However, QUIC reserves the error code with a value of 0
+application protocols.  However, QWIK reserves the error code with a value of 0
 to mean STOPPING.  The application error code of STOPPING (0) is used by the
 transport to cancel a stream in response to receipt of a STOP_SENDING frame.
 
@@ -4994,19 +4994,19 @@ transport to cancel a stream in response to receipt of a STOP_SENDING frame.
 
 ## Handshake Denial of Service
 
-As an encrypted and authenticated transport QUIC provides a range of protections
-against denial of service.  Once the cryptographic handshake is complete, QUIC
+As an encrypted and authenticated transport QWIK provides a range of protections
+against denial of service.  Once the cryptographic handshake is complete, QWIK
 endpoints discard most packets that are not authenticated, greatly limiting the
 ability of an attacker to interfere with existing connections.
 
-Once a connection is established QUIC endpoints might accept some
+Once a connection is established QWIK endpoints might accept some
 unauthenticated ICMP packets (see {{v4-pmtud}}), but the use of these packets is
 extremely limited.  The only other type of packet that an endpoint might accept
 is a stateless reset ({{stateless-reset}}) which relies on the token being kept
 secret until it is used.
 
-During the creation of a connection, QUIC only provides protection against
-attack from off the network path.  All QUIC packets contain proof that the
+During the creation of a connection, QWIK only provides protection against
+attack from off the network path.  All QWIK packets contain proof that the
 recipient saw a preceding packet from its peer.
 
 The first mechanism used is the source and destination connection IDs, which are
@@ -5018,7 +5018,7 @@ the only protection offered for Version Negotiation packets.
 The destination connection ID in an Initial packet is selected by a client to be
 unpredictable, which serves an additional purpose.  The packets that carry the
 cryptographic handshake are protected with a key that is derived from this
-connection ID and salt specific to the QUIC version.  This allows endpoints to
+connection ID and salt specific to the QWIK version.  This allows endpoints to
 use the same process for authenticating packets that they receive as they use
 after the cryptographic handshake completes.  Packets that cannot be
 authenticated are discarded.  Protecting packets in this fashion provides a
@@ -5026,11 +5026,11 @@ strong assurance that the sender of the packet saw the Initial packet and
 understood it.
 
 These protections are not intended to be effective against an attacker that is
-able to receive QUIC packets prior to the connection being established.  Such an
-attacker can potentially send packets that will be accepted by QUIC endpoints.
-This version of QUIC attempts to detect this sort of attack, but it expects that
+able to receive QWIK packets prior to the connection being established.  Such an
+attacker can potentially send packets that will be accepted by QWIK endpoints.
+This version of QWIK attempts to detect this sort of attack, but it expects that
 endpoints will fail to establish a connection rather than recovering.  For the
-most part, the cryptographic handshake protocol {{QUIC-TLS}} is responsible for
+most part, the cryptographic handshake protocol {{QWIK-TLS}} is responsible for
 detecting tampering during the handshake, though additional validation is
 required for version negotiation (see {{version-validation}}).
 
@@ -5080,13 +5080,13 @@ connection error of type PROTOCOL_VIOLATION (see {{immediate-close}}).
 
 The attacks commonly known as Slowloris {{SLOWLORIS}} try to keep many
 connections to the target endpoint open and hold them open as long as possible.
-These attacks can be executed against a QUIC endpoint by generating the minimum
+These attacks can be executed against a QWIK endpoint by generating the minimum
 amount of activity necessary to avoid being closed for inactivity.  This might
 involve sending small amounts of data, gradually opening flow control windows in
 order to control the sender rate, or manufacturing ACK frames that simulate a
 high loss rate.
 
-QUIC deployments SHOULD provide mitigations for the Slowloris attacks, such as
+QWIK deployments SHOULD provide mitigations for the Slowloris attacks, such as
 increasing the maximum number of clients the server will allow, limiting the
 number of connections a single IP address is allowed to make, imposing
 restrictions on the minimum transfer speed a connection is allowed to have, and
@@ -5110,7 +5110,7 @@ memory.  The over-commitment strategy can lead to better performance when
 endpoints are well behaved, but renders endpoints vulnerable to the stream
 fragmentation attack.
 
-QUIC deployments SHOULD provide mitigations against stream fragmentation
+QWIK deployments SHOULD provide mitigations against stream fragmentation
 attacks.  Mitigations could consist of avoiding over-committing memory,
 limiting the size of tracking data structures, delaying reassembly
 of STREAM frames, implementing heuristics based on the age and
@@ -5145,7 +5145,7 @@ their effects in more detail.
 An on-the-side attacker can duplicate and send packets with modified ECN
 codepoints to affect the sender's rate.  If duplicate packets are discarded by a
 receiver, an off-path attacker will need to race the duplicate packet against
-the original to be successful in this attack.  Therefore, QUIC receivers ignore
+the original to be successful in this attack.  Therefore, QWIK receivers ignore
 ECN codepoints set in duplicate packets (see {{using-ecn}}).
 
 ## Stateless Reset Oracle {#reset-oracle}
@@ -5175,12 +5175,12 @@ be influenced by an attacker.
 
 # IANA Considerations
 
-## QUIC Transport Parameter Registry {#iana-transport-parameters}
+## QWIK Transport Parameter Registry {#iana-transport-parameters}
 
-IANA \[SHALL add/has added] a registry for "QUIC Transport Parameters" under a
-"QUIC Protocol" heading.
+IANA \[SHALL add/has added] a registry for "QWIK Transport Parameters" under a
+"QWIK Protocol" heading.
 
-The "QUIC Transport Parameters" registry governs a 16-bit space.  This space is
+The "QWIK Transport Parameters" registry governs a 16-bit space.  This space is
 split into two spaces that are governed by different policies.  Values with the
 first byte in the range 0x00 to 0xfe (in hexadecimal) are assigned via the
 Specification Required policy {{!RFC8126}}.  Values with the first byte 0xff are
@@ -5225,14 +5225,14 @@ The initial contents of this registry are shown in {{iana-tp-table}}.
 | 0x000b | initial_max_stream_data_uni | {{transport-parameter-definitions}} |
 | 0x000c | max_ack_delay               | {{transport-parameter-definitions}} |
 | 0x000d | original_connection_id      | {{transport-parameter-definitions}} |
-{: #iana-tp-table title="Initial QUIC Transport Parameters Entries"}
+{: #iana-tp-table title="Initial QWIK Transport Parameters Entries"}
 
-## QUIC Frame Type Registry {#iana-frames}
+## QWIK Frame Type Registry {#iana-frames}
 
-IANA \[SHALL add/has added] a registry for "QUIC Frame Types" under a
-"QUIC Protocol" heading.
+IANA \[SHALL add/has added] a registry for "QWIK Frame Types" under a
+"QWIK Protocol" heading.
 
-The "QUIC Frame Types" registry governs a 62-bit space.  This space is split
+The "QWIK Frame Types" registry governs a 62-bit space.  This space is split
 into three spaces that are governed by different policies.  Values between 0x00
 and 0x3f (in hexadecimal) are assigned via the Standards Action or IESG Review
 policies {{!RFC8126}}.  Values from 0x40 to 0x3fff operate on the Specification
@@ -5269,12 +5269,12 @@ displeasing, or architecturally dubious).
 The initial contents of this registry are tabulated in {{frame-types}}.
 
 
-## QUIC Transport Error Codes Registry {#iana-error-codes}
+## QWIK Transport Error Codes Registry {#iana-error-codes}
 
-IANA \[SHALL add/has added] a registry for "QUIC Transport Error Codes" under a
-"QUIC Protocol" heading.
+IANA \[SHALL add/has added] a registry for "QWIK Transport Error Codes" under a
+"QWIK Protocol" heading.
 
-The "QUIC Transport Error Codes" registry governs a 16-bit space.  This space is
+The "QWIK Transport Error Codes" registry governs a 16-bit space.  This space is
 split into two spaces that are governed by different policies.  Values with the
 first byte in the range 0x00 to 0xfe (in hexadecimal) are assigned via the
 Specification Required policy {{!RFC8126}}.  Values with the first byte 0xff are
@@ -5317,7 +5317,7 @@ from 0xFF00 to 0xFFFF are reserved for Private Use {{!RFC8126}}.
 | 0x9   | VERSION_NEGOTIATION_ERROR | Version negotiation failure   | {{error-codes}} |
 | 0xA   | PROTOCOL_VIOLATION        | Generic protocol violation    | {{error-codes}} |
 | 0xC   | INVALID_MIGRATION         | Violated disabled migration   | {{error-codes}} |
-{: #iana-error-table title="Initial QUIC Transport Error Codes Entries"}
+{: #iana-error-table title="Initial QWIK Transport Error Codes Entries"}
 
 
 --- back
@@ -5404,8 +5404,8 @@ Substantial editorial reorganization; no technical changes.
 - Changes to integration of the TLS handshake (#829, #1018, #1094, #1165, #1190,
   #1233, #1242, #1252, #1450, #1458)
   - The cryptographic handshake uses CRYPTO frames, not stream 0
-  - QUIC packet protection is used in place of TLS record protection
-  - Separate QUIC packet number spaces are used for the handshake
+  - QWIK packet protection is used in place of TLS record protection
+  - Separate QWIK packet number spaces are used for the handshake
   - Changed Retry to be independent of the cryptographic handshake
   - Added NEW_TOKEN frame and Token fields to Initial packet
   - Limit the use of HelloRetryRequest to address TLS needs (like key shares)
@@ -5438,7 +5438,7 @@ Substantial editorial reorganization; no technical changes.
 - Swap payload length and packed number fields in long header (#1294)
 - Clarified that CONNECTION_CLOSE is allowed in Handshake packet (#1274)
 - Spin bit reserved (#1283)
-- Coalescing multiple QUIC packets in a UDP datagram (#1262, #1285)
+- Coalescing multiple QWIK packets in a UDP datagram (#1262, #1285)
 - A more complete connection migration (#1249)
 - Refine opportunistic ACK defense text (#305, #1030, #1185)
 - A Stateless Reset Token isn't mandatory (#818, #1191)
@@ -5567,7 +5567,7 @@ Substantial editorial reorganization; no technical changes.
 - No timestamps are forbidden in unprotected packets (#542, #429)
 - Cryptographic handshake is now on stream 0 (#456)
 - Remove congestion control exemption for cryptographic handshake (#248, #476)
-- Version 1 of QUIC uses TLS; a new version is needed to use a different
+- Version 1 of QWIK uses TLS; a new version is needed to use a different
   handshake protocol (#516)
 - STREAM frames have a reduced number of offset lengths (#543, #430)
 - Split some frames into separate connection- and stream- level frames
@@ -5662,7 +5662,7 @@ Substantial editorial reorganization; no technical changes.
 # Acknowledgments
 {:numbered="false"}
 
-Special thanks are due to the following for helping shape pre-IETF QUIC and its
+Special thanks are due to the following for helping shape pre-IETF QWIK and its
 deployment: Chris Bentzel, Misha Efimov, Roberto Peon, Alistair Riddoch,
 Siddharth Vijayakrishnan, and Assar Westerlund.
 
@@ -5679,7 +5679,7 @@ Swett, and Alyssa Wilk.
 
 The original design and rationale behind this protocol draw significantly from
 work by Jim Roskind {{EARLY-DESIGN}}. In alphabetical order, the contributors to
-the pre-IETF QUIC project at Google are: Britt Cyr, Jeremy Dorfman, Ryan
+the pre-IETF QWIK project at Google are: Britt Cyr, Jeremy Dorfman, Ryan
 Hamilton, Jana Iyengar, Fedor Kouranov, Charles Krasic, Jo Kulik, Adam Langley,
 Jim Roskind, Robbie Shade, Satyam Shekhar, Cherie Shi, Ian Swett, Raman Tenneti,
 Victor Vasiliev, Antonio Vicente, Patrik Westin, Alyssa Wilk, Dale Worley, Fan

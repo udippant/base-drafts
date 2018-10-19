@@ -1,12 +1,12 @@
 ---
-title: "QPACK: Header Compression for HTTP over QUIC"
+title: "QPACK: Header Compression for HTTP over QWIK"
 abbrev: QPACK
 docname: draft-ietf-quic-qpack-latest
 date: {DATE}
 category: std
 ipr: trust200902
 area: Transport
-workgroup: QUIC
+workgroup: QWIK
 
 stand_alone: yes
 pi: [toc, sortrefs, symrefs, docmapping]
@@ -32,8 +32,8 @@ author:
 
 normative:
 
-  QUIC-HTTP:
-    title: "Hypertext Transfer Protocol (HTTP) over QUIC"
+  QWIK-HTTP:
+    title: "Hypertext Transfer Protocol (HTTP) over QWIK"
     date: {DATE}
     seriesinfo:
       Internet-Draft: draft-ietf-quic-http-latest
@@ -44,8 +44,8 @@ normative:
           org: Akamai Technologies
           role: editor
 
-  QUIC-TRANSPORT:
-    title: "QUIC: A UDP-Based Multiplexed and Secure Transport"
+  QWIK-TRANSPORT:
+    title: "QWIK: A UDP-Based Multiplexed and Secure Transport"
     date: {DATE}
     seriesinfo:
       Internet-Draft: draft-ietf-quic-transport-latest
@@ -65,12 +65,12 @@ normative:
 --- abstract
 
 This specification defines QPACK, a compression format for efficiently
-representing HTTP header fields, to be used in HTTP/QUIC. This is a variation of
+representing HTTP header fields, to be used in HTTP/QWIK. This is a variation of
 HPACK header compression that seeks to reduce head-of-line blocking.
 
 --- note_Note_to_Readers
 
-Discussion of this draft takes place on the QUIC working group mailing list
+Discussion of this draft takes place on the QWIK working group mailing list
 (quic@ietf.org), which is archived at
 <https://mailarchive.ietf.org/arch/search/?email_list=quic>.
 
@@ -82,17 +82,17 @@ code and issues list for this draft can be found at
 
 # Introduction
 
-The QUIC transport protocol was designed from the outset to support HTTP
+The QWIK transport protocol was designed from the outset to support HTTP
 semantics, and its design subsumes many of the features of HTTP/2.  HTTP/2 uses
-HPACK ({{!RFC7541}}) for header compression, but QUIC's stream multiplexing
-comes into some conflict with HPACK.  A key goal of the design of QUIC is to
+HPACK ({{!RFC7541}}) for header compression, but QWIK's stream multiplexing
+comes into some conflict with HPACK.  A key goal of the design of QWIK is to
 improve stream multiplexing relative to HTTP/2 by reducing head-of-line
-blocking.  If HPACK were used for HTTP/QUIC, it would induce head-of-line
+blocking.  If HPACK were used for HTTP/QWIK, it would induce head-of-line
 blocking due to built-in assumptions of a total ordering across frames on all
 streams.
 
-QUIC is described in {{QUIC-TRANSPORT}}.  The HTTP/QUIC mapping is described in
-{{QUIC-HTTP}}. For a full description of HTTP/2, see {{?RFC7540}}. The
+QWIK is described in {{QWIK-TRANSPORT}}.  The HTTP/QWIK mapping is described in
+{{QWIK-HTTP}}. For a full description of HTTP/2, see {{?RFC7540}}. The
 description of HPACK is {{!RFC7541}}.
 
 QPACK reuses core concepts from HPACK, but is redesigned to allow correctness in
@@ -139,9 +139,9 @@ The maximum size of the dynamic table can be modified by the encoder, subject to
 a decoder-controlled limit (see {{configuration}} and {{size-update}}).  The
 initial maximum size is determined by the corresponding setting when HTTP
 requests or responses are first permitted to be sent. For clients using 0-RTT
-data in HTTP/QUIC, the table size is the remembered value of the setting, even
+data in HTTP/QWIK, the table size is the remembered value of the setting, even
 if the server later specifies a larger maximum in its SETTINGS frame.  For
-HTTP/QUIC servers and HTTP/QUIC clients when 0-RTT is not attempted or is
+HTTP/QWIK servers and HTTP/QWIK clients when 0-RTT is not attempted or is
 rejected, the initial maximum table size is the value of the setting in the
 peer's SETTINGS frame.
 
@@ -172,7 +172,7 @@ much memory is used by the dynamic table.  To limit the memory requirements of
 the decoder, the dynamic table size is strictly bounded.
 
 The decoder determines the maximum size that the encoder is permitted to use for
-the dynamic table.  In HTTP/QUIC, this value is determined by the
+the dynamic table.  In HTTP/QWIK, this value is determined by the
 SETTINGS_HEADER_TABLE_SIZE setting (see {{configuration}}).
 
 An encoder can choose to use less capacity than this maximum size (see
@@ -294,9 +294,9 @@ If the decoder encounters a reference on the encoder stream to a dynamic table
 entry which has already been dropped, it MUST treat this as a connection error
 of type `HTTP_QPACK_ENCODER_STREAM_ERROR`.
 
-## Avoiding Head-of-Line Blocking in HTTP/QUIC {#overview-hol-avoidance}
+## Avoiding Head-of-Line Blocking in HTTP/QWIK {#overview-hol-avoidance}
 
-Because QUIC does not guarantee order between data on different streams, a
+Because QWIK does not guarantee order between data on different streams, a
 header block might reference an entry in the dynamic table that has not yet been
 received.
 
@@ -411,7 +411,7 @@ x ...
 
 #  Configuration
 
-QPACK defines two settings which are included in the HTTP/QUIC SETTINGS frame.
+QPACK defines two settings which are included in the HTTP/QWIK SETTINGS frame.
 
   SETTINGS_HEADER_TABLE_SIZE (0x1):
   : An integer with a maximum value of 2^30 - 1.  The default value is 4,096
@@ -574,7 +574,7 @@ maximum table size is represented as an integer with a 5-bit prefix (see Section
 
 The new maximum size MUST be lower than or equal to the limit determined by the
 protocol using QPACK.  A value that exceeds this limit MUST be treated as a
-connection error of type `HTTP_QPACK_ENCODER_STREAM_ERROR`.  In HTTP/QUIC, this
+connection error of type `HTTP_QPACK_ENCODER_STREAM_ERROR`.  In HTTP/QWIK, this
 limit is the value of the SETTINGS_HEADER_TABLE_SIZE parameter (see
 {{configuration}}) received from the decoder.
 
@@ -912,7 +912,7 @@ represented as an 8-bit prefix string literal.
 
 # Error Handling {#error-handling}
 
-The following error codes are defined for HTTP/QUIC to indicate failures of
+The following error codes are defined for HTTP/QWIK to indicate failures of
 QPACK which prevent the stream or connection from continuing:
 
 HTTP_QPACK_DECOMPRESSION_FAILED (TBD):
@@ -1078,8 +1078,8 @@ TBD.
 
 ## Settings Registration
 
-This document creates two new settings in the "HTTP/QUIC Settings" registry
-established in {{QUIC-HTTP}}.
+This document creates two new settings in the "HTTP/QWIK Settings" registry
+established in {{QWIK-HTTP}}.
 
 The entries in the following table are registered by this document.
 
@@ -1092,8 +1092,8 @@ The entries in the following table are registered by this document.
 
 ## Stream Type Registration
 
-This document creates two new settings in the "HTTP/QUIC Stream Type" registry
-established in {{QUIC-HTTP}}.
+This document creates two new settings in the "HTTP/QWIK Stream Type" registry
+established in {{QWIK-HTTP}}.
 
 The entries in the following table are registered by this document.
 
@@ -1106,8 +1106,8 @@ The entries in the following table are registered by this document.
 
 ## Error Code Registration
 
-This document establishes the following new error codes in the "HTTP/QUIC Error
-Code" registry established in {{QUIC-HTTP}}.
+This document establishes the following new error codes in the "HTTP/QWIK Error
+Code" registry established in {{QWIK-HTTP}}.
 
 | --------------------------------- | ----- | ---------------------------------------- | ---------------------- |
 | Name                              | Code  | Description                              | Specification          |
